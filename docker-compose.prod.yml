@@ -1,0 +1,16 @@
+version: '3.1'
+
+services:
+
+  api:
+    environment:
+      NODE_ENV: dev
+    ports:
+      - 443:3000
+
+  db:
+    environment:
+      POSTGRES_PASSWORD: ${PG_PWD}
+
+  redis:
+    command: redis-server --requirepass ${REDIS_PWD}

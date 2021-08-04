@@ -1,0 +1,21 @@
+version: '3.1'
+
+services:
+
+  api:
+    environment:
+      NODE_ENV: dev
+    ports:
+      - 3000:3000
+    volumes:
+      - ./:/home/node/app
+
+  db:
+    environment:
+      POSTGRES_PASSWORD: example
+    volumes:
+      - ./db/snapshots:/docker-entrypoint-initdb.d
+      - ./db/bin:/home/bin
+
+  redis:
+    command: redis-server --requirepass 96104305cdf1e02badc378cef3f60f23319d1600a6de13f71f120e476061dba3

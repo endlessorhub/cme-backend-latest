@@ -1,0 +1,103 @@
+{
+  "collection": "@nestjs/schematics",
+  "sourceRoot": "apps/cme-backend/src",
+  "compilerOptions": {
+    "webpack": false,
+    "tsConfigPath": "apps/cme-backend/tsconfig.app.json"
+  },
+  "monorepo": true,
+  "root": "apps/cme-backend",
+  "projects": {
+    "cme-backend": {
+      "type": "application",
+      "root": "apps/cme-backend",
+      "entryFile": "main",
+      "sourceRoot": "apps/cme-backend/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/cme-backend/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/cme-backend/config"
+          }
+        ]
+      }
+    },
+    "units-production-scheduler": {
+      "type": "application",
+      "root": "apps/units-production-scheduler",
+      "entryFile": "main",
+      "sourceRoot": "apps/units-production-scheduler/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/units-production-scheduler/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/units-production-scheduler/config"
+          }
+        ]
+      }
+    },
+    "units-producer": {
+      "type": "application",
+      "root": "apps/units-producer",
+      "entryFile": "main",
+      "sourceRoot": "apps/units-producer/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/units-producer/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/units-producer/config"
+          }
+        ]
+      }
+    },
+    "redlock": {
+      "type": "library",
+      "root": "libs/redlock",
+      "entryFile": "index",
+      "sourceRoot": "libs/redlock/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/redlock/tsconfig.lib.json"
+      }
+    },
+    "scheduler": {
+      "type": "library",
+      "root": "libs/scheduler",
+      "entryFile": "index",
+      "sourceRoot": "libs/scheduler/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/scheduler/tsconfig.lib.json"
+      }
+    },
+    "configuration": {
+      "type": "library",
+      "root": "libs/configuration",
+      "entryFile": "index",
+      "sourceRoot": "libs/configuration/src",
+      "compilerOptions": {
+        "tsConfigPath": "libs/configuration/tsconfig.lib.json"
+      }
+    },
+    "battles-manager": {
+      "type": "application",
+      "root": "apps/battles-manager",
+      "entryFile": "main",
+      "sourceRoot": "apps/battles-manager/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/battles-manager/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/battles-manager/config"
+          }
+        ]
+      }
+    }
+  }
+}

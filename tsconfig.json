@@ -1,0 +1,39 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "declaration": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": true,
+    "outDir": "./dist",
+    "baseUrl": "./",
+    "incremental": true,
+    "resolveJsonModule": true,
+    "paths": {
+      "src/*": [
+        "src/*"
+      ],
+      "@app/redlock": [
+        "libs/redlock/src"
+      ],
+      "@app/redlock/*": [
+        "libs/redlock/src/*"
+      ],
+      "@app/scheduler": [
+        "libs/scheduler/src"
+      ],
+      "@app/scheduler/*": [
+        "libs/scheduler/src/*"
+      ],
+      "@app/configuration": [
+        "libs/configuration/src"
+      ],
+      "@app/configuration/*": [
+        "libs/configuration/src/*"
+      ]
+    }
+  }
+}

@@ -1,75 +1,103 @@
 <p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo_text.svg" width="320" alt="Nest Logo" /></a>
+  <a href="https://www.milkyway.games/" target="blank"><img src="https://z2p3v6v9.rocketcdn.me/wp-content/uploads/2021/05/logoSeul-1.png" width="100" alt="CME Logo" /></a>
 </p>
 
-[travis-image]: https://api.travis-ci.org/nestjs/nest.svg?branch=master
-[travis-url]: https://travis-ci.org/nestjs/nest
-[linux-image]: https://img.shields.io/travis/nestjs/nest/master.svg?label=linux
-[linux-url]: https://travis-ci.org/nestjs/nest
-  
-  <p align="center">A progressive <a href="http://nodejs.org" target="blank">Node.js</a> framework for building efficient and scalable server-side applications, heavily inspired by <a href="https://angular.io" target="blank">Angular</a>.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore"><img src="https://img.shields.io/npm/dm/@nestjs/core.svg" alt="NPM Downloads" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://api.travis-ci.org/nestjs/nest.svg?branch=master" alt="Travis" /></a>
-<a href="https://travis-ci.org/nestjs/nest"><img src="https://img.shields.io/travis/nestjs/nest/master.svg?label=linux" alt="Linux" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#5" alt="Coverage" /></a>
-<a href="https://gitter.im/nestjs/nestjs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=body_badge"><img src="https://badges.gitter.im/nestjs/nestjs.svg" alt="Gitter" /></a>
-<a href="https://opencollective.com/nest#backer"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec"><img src="https://img.shields.io/badge/Donate-PayPal-dc3d53.svg"/></a>
-  <a href="https://twitter.com/nestframework"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
+<p align="center">
+  Backend code for the <a href="https://www.milkyway.games/" target="blank">Crypto Monkey Empire</a> game.
 </p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+
+## Table of content
+
+* [Description](#description)
+* [Requirements](#requirements)
+* [Infra](#infra)
+ * [Init](#init)
+ * [Run](#run)
+* [Architecture / code](#init)
+ * [Concept](#description)
+ * Redis (TODO)
+ * DB (TODO)
+* [How to: push new code](#description)
+* Testing (TODO)
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+This project is developped using:
+* Javascript / Typescript (https://www.typescriptlang.org/docs/)
+* Nodejs
+* Nest (https://docs.nestjs.com/)
+* Docker
 
-## Installation
+## Requirements
 
-```bash
-$ npm install
+To be able to run this project and code for it, you'll have to have installed:
+* Node js / npm. The Docker container currently uses version 14, but it might evolve. I recommend using nvm (https://github.com/nvm-sh/nvm )
+* An up-to-date docker system: the easiest way is to use Docker Desktop (https://www.docker.com/products/docker-desktop)
+
+## Infra
+
+This project's Infrastructure relys on Docker. Once you have it working, you only need to follow the Init step once, then the Run step when you want to run the project.
+
+Note: for windows user, it will be necessary to run Docker desktop manually first (our bash scripts only support launchctl and systemctl)
+
+### Init
+
+Go to the project's root and run:
+
+```$> ./init.sh```
+
+This will help identify the container to docker without having to push it online in the Docker base.
+
+### Run
+
+Go to the project's root and run:
+
+```$> ./boot.sh```
+
+This will launch every service needed to run the project.
+After that, you can see it running directly in Docker Desktop.
+
+## Architecture
+
+Nest js allows us to deploy a multi services architecture pretty easily (just a bit different than microservices, but the use is mainly similar).
+
+The database uses Postgres.
+
+### Concept
+
+The cme-backend service is the main service, used as the Http Layer to communicate with the frontend apps.
+It communicates with the Battles manager, the Units producer and the Units production scheduler using Redis events.
+
+All the services have access to the DB
+
+```
+ _________________   ________________   ____________________________
+|                 | |                | |                            |
+| battles-manager | | units-producer | | units-production-scheduler |
+|_________________| |________________| |____________________________|      _____________________
+                                                                          |                     |
+         |                 |                       |               |--->  |    DB (postgres)    |
+ ____________________________________________________________________     |_____________________|
+|                                                                    |
+|                      cme-backend / http layer                      |
+|____________________________________________________________________|
+
+                               |
+ ____________________________________________________________________
+|                                                                    |
+|                  front apps (iOs/Android/desktop)                  |
+|____________________________________________________________________|
 ```
 
-## Running the app
 
-```bash
-# development
-$ npm run start
 
-# watch mode
-$ npm run start:dev
+## How to: push new code
 
-# production mode
-$ npm run start:prod
-```
+To keep track of our changes and insure a minimum code quality, we try to do pull requests instead of just pushing to the main branch.
 
-## Test
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
-```
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-  Nest is [MIT licensed](LICENSE).
+To do that:
+* Everytime you want to start coding a new feature, create a branch for this one
+* Once you're done, propose a PR from this branch to the main branch
+* Assign at least Florian and/or Simon, and don't hesitate to ping them on Discord so they know you just pushed a PR.
+* A review will be done, some changes might be required before approval
+* Once you have approval, you can merge it to the main branch (don't forget to rebase if you see any issue blocking the merge)

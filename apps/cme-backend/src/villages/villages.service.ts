@@ -1,12 +1,14 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { getConnection, getManager, Repository } from 'typeorm';
+import { Between, getConnection, getManager, Repository } from 'typeorm';
 import { Village } from './village.entity';
 import { User } from '../users/user.entity';
 import { ResourceType } from '../resource-types/resource-type.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
 import { CreateVillageDto } from './dto/create-village.dto';
 import * as Promise from 'bluebird';
+import { off } from 'process';
+
 
 
 @Injectable()
@@ -20,6 +22,30 @@ export class VillagesService {
 
   findAll(): Promise<Village[]> {
     return this.villagesRepository.find();
+  }
+
+  findAllAround(x: number, y: number, offset: number): Promise<Village[]> {
+    console.log("x " + x);
+    console.log("y " + y);
+    console.log("offset " + offset);
+    let x_min = x - offset;
+    if(x_min < 0){ x_min = 0;}
+
+    let x_max = x + offset;
+    if(x_max > 63){ x_max = 63;}
+
+    let y_min = y - offset;
+    if(y_min < 0){y_min = 0;}
+
+    let y_max = y + offset;
+    if(y_max > 63){y_max = 63;}
+
+    return this.villagesRepository.find({ 
+                    where: [
+                    {
+                      x:Between(x_min, x_max) , y:Between(y_min, y_max) 
+                    }
+                    ]});
   }
 
   findOne(id: string): Promise<Village> {

@@ -42,6 +42,13 @@ export class VillagesController {
         return permission.filter(village);
     }
 
+    @Get(':x/:y/:offset')
+    async showAround(@Request() req, @Param('x') xCam: number, @Param('y') yCam: number, @Param('offset') radius : number) {
+        const permission = this.rolesBuilder.can(req.user.roles).readAny('village');
+        
+        return permission.filter(await this.villagesService.findAllAround(xCam,yCam,radius));
+    }
+
     @Post()
     @UsePipes(new ValidationPipe({ transform: true }))
     create(@Request() req, @Body() village: CreateVillageDto) {

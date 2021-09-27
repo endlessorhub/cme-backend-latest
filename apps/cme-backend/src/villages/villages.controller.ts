@@ -49,6 +49,13 @@ export class VillagesController {
         return permission.filter(await this.villagesService.findAllAround(xCam,yCam,radius));
     }
 
+    @Get(':x1/:y1/:x2/:y2')
+    async showVillagesRectangle(@Request() req, @Param('x1') x1: number, @Param('y1') y1: number, @Param('x2') x2 : number, @Param('y2') y2 : number) {
+        const permission = this.rolesBuilder.can(req.user.roles).readAny('village');
+        
+        return permission.filter(await this.villagesService.findRectangle(x1,y1,x2,y2));
+    }
+
     @Post()
     @UsePipes(new ValidationPipe({ transform: true }))
     create(@Request() req, @Body() village: CreateVillageDto) {

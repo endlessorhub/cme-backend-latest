@@ -13,6 +13,9 @@ import { off } from 'process';
 
 @Injectable()
 export class VillagesService {
+
+  
+
   constructor(
     @InjectRepository(Village)
     private villagesRepository: Repository<Village>,
@@ -25,25 +28,32 @@ export class VillagesService {
   }
 
   findAllAround(x: number, y: number, offset: number): Promise<Village[]> {
-    console.log("x " + x);
-    console.log("y " + y);
-    console.log("offset " + offset);
+    const MAP_SIZE = 64;
     let x_min = x - offset;
     if(x_min < 0){ x_min = 0;}
 
     let x_max = x + offset;
-    if(x_max > 63){ x_max = 63;}
+    if(x_max > MAP_SIZE){ x_max = MAP_SIZE;}
 
     let y_min = y - offset;
     if(y_min < 0){y_min = 0;}
 
     let y_max = y + offset;
-    if(y_max > 63){y_max = 63;}
+    if(y_max > MAP_SIZE){y_max = MAP_SIZE;}
 
     return this.villagesRepository.find({ 
                     where: [
                     {
                       x:Between(x_min, x_max) , y:Between(y_min, y_max) 
+                    }
+                    ]});
+  }
+
+  findRectangle(x1: number, y1: number, x2: number, y2 : number): Promise<Village[]> {
+    return this.villagesRepository.find({ 
+                    where: [
+                    {
+                      x:Between(x1, x2) , y:Between(y2, y2) 
                     }
                     ]});
   }

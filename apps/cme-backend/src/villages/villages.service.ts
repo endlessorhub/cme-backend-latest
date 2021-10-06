@@ -7,14 +7,8 @@ import { ResourceType } from '../resource-types/resource-type.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
 import { CreateVillageDto } from './dto/create-village.dto';
 import * as Promise from 'bluebird';
-import { off } from 'process';
-
-
-
 @Injectable()
 export class VillagesService {
-
-  
 
   constructor(
     @InjectRepository(Village)
@@ -27,33 +21,41 @@ export class VillagesService {
     return this.villagesRepository.find();
   }
 
-  findAllAround(x: number, y: number, offset: number): Promise<Village[]> {
-    const MAP_SIZE = 64;
-    let x_min = x - offset;
-    if(x_min < 0){ x_min = 0;}
+  findAllAround(
+      x: number, 
+      y: number, 
+      offset: number
+    ): Promise<Village[]> {
 
-    let x_max = x + offset;
-    if(x_max > MAP_SIZE){ x_max = MAP_SIZE;}
+    let x_min = x - offset;
+    if(x_min < 0){
+      x_min = 0;
+    }
 
     let y_min = y - offset;
-    if(y_min < 0){y_min = 0;}
-
-    let y_max = y + offset;
-    if(y_max > MAP_SIZE){y_max = MAP_SIZE;}
+    if(y_min < 0){
+      y_min = 0;
+    }
 
     return this.villagesRepository.find({ 
                     where: [
                     {
-                      x:Between(x_min, x_max) , y:Between(y_min, y_max) 
+                      x:Between(x_min, x + offset) , y:Between(y_min, y + offset) 
                     }
                     ]});
   }
 
-  findRectangle(x1: number, y1: number, x2: number, y2 : number): Promise<Village[]> {
+  findRectangle(
+      x1: number, 
+      y1: number, 
+      x2: number, 
+      y2 : number
+    ): Promise<Village[]> {
+
     return this.villagesRepository.find({ 
                     where: [
                     {
-                      x:Between(x1, x2) , y:Between(y2, y2) 
+                      x:Between(x1, x2) , y:Between(y1, y2) 
                     }
                     ]});
   }

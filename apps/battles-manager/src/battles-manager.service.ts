@@ -6,61 +6,13 @@ import { Connection, QueryRunner } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 import * as _ from 'lodash';
 
-interface casualtiesInfo {
-  unitTypeId: number,
-  unitTypeName: string,
-  count: number,
-};
-
-interface casualtiesInfoByUnitTypeId {
-  [ key: string ]: casualtiesInfo,
-}
-
-interface attackCasualties {
-  [ key: string ]: {
-    casualtiesInfoByUnitTypeId: casualtiesInfoByUnitTypeId,
-  },
-};
-
-interface unitCharacteristics {
-  health: number,
-  range: number,
-  damage: number,
-  defense: number,
-  pierce_defense: number,
-  speed: number,
-  food_upkeep: number,
-  production_time: number,
-};
-
-interface unitInfo {
-  unitTypeId: number,
-  unitTypeName: string,
-  characteristics?: unitCharacteristics,
-  count?: number,
-}
-
-interface unitInfoByType {
-  [ key: string ]: unitInfo,
-}
-
-interface attackReport {
-  attackId: number,
-  travelTime: number,
-  attackerVillageId: number,
-  defenderVillageId: number,
-  winnerVillageId: number,
-  loserVillageId,
-  unitsInfoByType: {
-    [ key: string ]: unitInfoByType,
-  },
-  casualties: attackCasualties,
-}
-
-enum StakeholderStatus {
-  ATTACKER = 'attacker',
-  DEFENDER = 'defender',
-}
+import {
+  casualtiesInfoByUnitTypeId,
+  attackReport,
+  unitInfo,
+  unitInfoByType,
+} from './types';
+import { generateAttackReport } from './utils/attackReport';
 
 @Injectable()
 export class BattlesManagerService {
@@ -88,57 +40,69 @@ export class BattlesManagerService {
       WHERE
         characteristics IS NOT NULL
     `);
-    // this.unitsInfoByType = _.keyBy(this.unitsInfo, 'id');
-  }
-
-  getStakeholderPoints(stakeholderUnitsInfoByType: unitInfoByType, stakeholderStatus: StakeholderStatus): number {
-    return _.sumBy(this.unitsInfo, (unitInfo) => {
-      if (stakeholderUnitsInfoByType[unitInfo.unitTypeName] === undefined) {
-        return 0;
-      }
-      return stakeholderUnitsInfoByType[unitInfo.unitTypeName].count * (
-        stakeholderStatus === StakeholderStatus.ATTACKER ?
-        unitInfo.characteristics.damage :
-        unitInfo.characteristics.defense + unitInfo.characteristics.pierce_defense
-      );
-    });
-  }
-
-  getStakeholderCasualties(stakeholderUnitsInfoByType: unitInfoByType, casualtiesRatio: number) {
-    return _.mapValues(stakeholderUnitsInfoByType, (unitsInfo) => {
-      return {
-        ...unitsInfo,
-        count: Math.round(unitsInfo.count * casualtiesRatio),
-      };
-    });
   }
 
   getUpdateValuesAsSql(stakeholderCasualties: casualtiesInfoByUnitTypeId) {
-    return Object.values(stakeholderCasualties).reduce((acc, { unitTypeId, unitTypeName, count }, i) => {
-      return `${acc}${i === 0 ? '' : ','}(${unitTypeId},${count})`;
-    }, '');
+    return Object.values(stakeholderCasualties).reduce(
+      (acc, { unitTypeId, unitTypeName, count }, i) => {
+        return `${acc}${i === 0 ? '' : ','}(${unitTypeId},${count})`;
+      },
+      '',
+    );
   }
 
-  getAttackerUpdateValuesAsSql(unitsInfoByType: unitInfoByType, casualties: casualtiesInfoByUnitTypeId) {
-    return Object.values(casualties).reduce((acc, { unitTypeId, unitTypeName, count: casualtiesCount }, i) => {
-      return `${acc}${i === 0 ? '' : ','}(${unitTypeId},${unitsInfoByType[unitTypeName].count - casualtiesCount})`;
-    }, '');
+  async updateAttackerValuesAfterReturnAsSql(
+    unitsInfoByType: unitInfoByType,
+    casualties: casualtiesInfoByUnitTypeId,
+    attackerVillageId: number,
+    attackId: number,
+  ) {
+    // returns a string with the following format '(unit_type_id, casualties_count)'
+    const attackerCasualtiesCount = Object.values(casualties).reduce(
+      (acc, { unitTypeId, unitTypeName, count: casualtiesCount }, i) => {
+        return `${acc}${i === 0 ? '' : ','}(${unitTypeId},${
+          unitsInfoByType[unitTypeName].count - casualtiesCount
+        })`;
+      },
+      '',
+    );
+
+    await this.queryRunner.query(`
+      UPDATE villages_resource_types AS vrt
+      SET
+        count = count + v.returned_count,
+        updated_at = NOW()
+      FROM (values ${attackerCasualtiesCount}) AS v(unit_type_id, returned_count)
+      WHERE 
+        vrt.village_id = ${attackerVillageId} AND
+        vrt.resource_type_id = v.unit_type_id
+
+      UPDATE attacks
+      SET
+        is_troop_home = TRUE
+      WHERE
+        id = ${attackId};
+    `);
   }
 
-  async updateDb(attackReport: attackReport) {
+  async updateDb(attackFinalReport: attackReport) {
     const {
       attackId,
       travelTime,
       attackerVillageId,
       defenderVillageId,
       winnerVillageId,
-      loserVillageId,
       unitsInfoByType,
       casualties,
-    } = attackReport;
+    } = attackFinalReport;
 
-    const defenderCasualtiesCount = this.getUpdateValuesAsSql(casualties[defenderVillageId].casualtiesInfoByUnitTypeId);
+    const defenderCasualtiesCount = this.getUpdateValuesAsSql(
+      casualties[defenderVillageId].casualtiesInfoByUnitTypeId,
+    );
 
+    const attackerWon = attackerVillageId === winnerVillageId;
+
+    // Update the defender village resources
     await this.queryRunner.query(`
       UPDATE villages_resource_types AS vrt
       SET
@@ -151,116 +115,62 @@ export class BattlesManagerService {
 
       UPDATE attacks
       SET
-        report = '${JSON.stringify({ unitsInfoByType, casualties })}'
+        report = '${JSON.stringify({ unitsInfoByType, casualties })}',
+        is_under_attack = false
+        is_troop_home = ${attackerWon ? 'FALSE' : 'TRUE'}
       WHERE
         id = ${attackId};
     `);
 
-    if (attackerVillageId === winnerVillageId) {
-      await this.redisClient.zadd(
-        `delayed:return`,
-        Date.now() + travelTime,
-        JSON.stringify({
-          attackId,
-          attackerVillageId,
-          attackerUnitsInfoByType: unitsInfoByType[attackerVillageId],
-          attackerCasualties: casualties[attackerVillageId].casualtiesInfoByUnitTypeId,
-          queue: 'pending:return',
-        }),
-      ).catch(e => {
-        console.error(e);
-      });
+    // Update the attacker village resources, but only after they returned
+    if (attackerWon) {
+      await this.redisClient
+        .zadd(
+          `delayed:return`,
+          Date.now() + travelTime,
+          JSON.stringify({
+            attackId,
+            attackerVillageId,
+            attackerUnitsInfoByType: unitsInfoByType[attackerVillageId],
+            attackerCasualties:
+              casualties[attackerVillageId].casualtiesInfoByUnitTypeId,
+            queue: 'pending:return',
+          }),
+        )
+        .catch((e) => {
+          console.error(e);
+        });
     }
-  }
-
-  getAttackReport({
-    attackId,
-    travelTime,
-    attackerVillageId,
-    attackerUnitsInfoByType,
-    defenderVillageId,
-    defenderUnitsInfoByType,
-  }): attackReport {
-    const attackerPoints = this.getStakeholderPoints(attackerUnitsInfoByType, StakeholderStatus.ATTACKER);
-    const defenderPoints = this.getStakeholderPoints(defenderUnitsInfoByType, StakeholderStatus.DEFENDER);
-
-    let winnerVillageId: number;
-    let loserVillageId: number;
-    let casualtiesBase: number;
-
-    // Attacker points are always > 0 as the check for units count is done in the API
-    if (attackerPoints > defenderPoints) {
-      winnerVillageId = attackerVillageId;
-      loserVillageId = defenderVillageId;
-      casualtiesBase = defenderPoints / attackerPoints;
-    } else if (attackerPoints < defenderPoints) {
-      winnerVillageId = defenderVillageId;
-      loserVillageId = attackerVillageId;
-      casualtiesBase = attackerPoints / defenderPoints;
-    } else {
-      winnerVillageId = null;
-      loserVillageId = null;
-      casualtiesBase = attackerPoints / defenderPoints; // = 1
-    }
-
-    const casualtiesRatio = casualtiesBase ** (3/2);
-
-    let attackerCasualties;
-    let defenderCasualties;
-    if (attackerVillageId === winnerVillageId) {
-      attackerCasualties = this.getStakeholderCasualties(attackerUnitsInfoByType, casualtiesRatio);
-      defenderCasualties = this.getStakeholderCasualties(defenderUnitsInfoByType, 1);
-    } else if (defenderVillageId === winnerVillageId) {
-      attackerCasualties = this.getStakeholderCasualties(attackerUnitsInfoByType, 1);
-      defenderCasualties = this.getStakeholderCasualties(defenderUnitsInfoByType, casualtiesRatio);
-    } else {
-      attackerCasualties = this.getStakeholderCasualties(attackerUnitsInfoByType, 1);
-      defenderCasualties = this.getStakeholderCasualties(defenderUnitsInfoByType, 1);
-    }
-
-    return {
-      attackId,
-      travelTime,
-      attackerVillageId,
-      defenderVillageId,
-      winnerVillageId,
-      loserVillageId,
-      unitsInfoByType: {
-        [attackerVillageId]: attackerUnitsInfoByType,
-        [defenderVillageId]: defenderUnitsInfoByType,
-      },
-      casualties: {
-        [attackerVillageId]: {
-          casualtiesInfoByUnitTypeId: attackerCasualties,
-        },
-        [defenderVillageId]: {
-          casualtiesInfoByUnitTypeId: defenderCasualties,
-        }
-      },
-    };
   }
 
   @Cron('* * * * * *')
   async handle() {
-    await Promise.mapSeries([
-      // TO DO: add raid attack
-      'normal',
-    ],async (attackType: string) => {
-      const listName = `pending:${attackType}`;
-      const item = await this.redisClient.lpop(listName);
-      if (!item) return;
+    /**
+     * This first part describes the attack itself
+     */
+    await Promise.mapSeries(
+      [
+        // TO DO: add raid attack
+        'normal',
+      ],
+      async (attackType: string) => {
+        const listName = `pending:${attackType}`;
+        const item = await this.redisClient.lpop(listName);
+        if (!item) {
+          return;
+        }
 
-      const parsed = JSON.parse(item);
-      const {
-        attackId,
-        travelTime,
-        attackerVillageId,
-        defenderVillageId,
-        attackerUnitsInfoByType,
-        // queue,
-      } = parsed;
+        const parsed = JSON.parse(item);
+        const {
+          attackId,
+          travelTime,
+          attackerVillageId,
+          defenderVillageId,
+          attackerUnitsInfoByType,
+          // queue,
+        } = parsed;
 
-      const defenderUnitsInfo = await this.queryRunner.query(`
+        const defenderUnitsInfo = await this.queryRunner.query(`
         SELECT
           vrt.resource_type_id AS "unitTypeId",
           rt.type AS "unitTypeName",
@@ -274,48 +184,47 @@ export class BattlesManagerService {
         )
       `);
 
-      const defenderUnitsInfoByType = _.keyBy(defenderUnitsInfo, 'unitTypeName');
-      
-      const report = this.getAttackReport({
-        attackId,
-        travelTime,
-        attackerVillageId,
-        attackerUnitsInfoByType,
-        defenderVillageId,
-        defenderUnitsInfoByType,
-      });
+        const defenderUnitsInfoByType = _.keyBy(
+          defenderUnitsInfo,
+          'unitTypeName',
+        );
 
-      await this.updateDb(report);
-    });
+        const report = generateAttackReport(
+          attackId,
+          travelTime,
+          attackerVillageId,
+          attackerUnitsInfoByType,
+          defenderVillageId,
+          defenderUnitsInfoByType,
+          this.unitsInfo,
+        );
 
+        await this.updateDb(report);
+      },
+    );
+
+    /**
+     * This second part describes the update done when the attacker units come back (if they came back)
+     */
     const pendingReturnsListName = 'pending:return';
     const item = await this.redisClient.lpop(pendingReturnsListName);
-    if (!item) return;
+    if (!item) {
+      return;
+    }
 
     const parsed = JSON.parse(item);
     const {
-      attackId,
       attackerVillageId,
       attackerUnitsInfoByType,
       attackerCasualties,
+      attackId,
     } = parsed;
 
-    // ****************************************************************************
-    // Update multiple rows with different values and based on different conditions
-
-    // returns a string with the following format '(unit_type_id, casualties_count)'
-    const attackerCasualtiesCount = this.getAttackerUpdateValuesAsSql(attackerUnitsInfoByType, attackerCasualties);
-
-    await this.queryRunner.query(`
-      UPDATE villages_resource_types AS vrt
-      SET
-        count = count + v.returned_count,
-        updated_at = NOW()
-      FROM (values ${attackerCasualtiesCount}) AS v(unit_type_id, returned_count)
-      WHERE 
-        vrt.village_id = ${attackerVillageId} AND
-        vrt.resource_type_id = v.unit_type_id
-    `);
-    // ****************************************************************************
+    this.updateAttackerValuesAfterReturnAsSql(
+      attackerUnitsInfoByType,
+      attackerCasualties,
+      attackerVillageId,
+      attackId,
+    );
   }
 }

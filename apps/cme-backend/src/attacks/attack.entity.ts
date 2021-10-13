@@ -37,6 +37,11 @@ export class Attack {
   })
   report: Record<string, any>; // TODO: create a TS type for the report
 
+  @Column({
+    name: 'is_under_attack',
+  })
+  isUnderAttack: boolean;
+
   // Attacker data
 
   @ManyToOne(() => Village, (village) => village.attacksFrom, {

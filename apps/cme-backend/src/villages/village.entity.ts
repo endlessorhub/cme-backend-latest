@@ -68,9 +68,11 @@ export class Village {
   )
   villagesResourceTypes: VillageResourceType[];
 
+  // The attacks this village started.
   @OneToMany(() => Attack, (attack) => attack.attackerVillage)
   attacksFrom: Attack[];
 
+  // The attacks other villages started on this village.
   @OneToMany(() => Attack, (attack) => attack.defenderVillage)
   attacksTo: Attack[];
 }

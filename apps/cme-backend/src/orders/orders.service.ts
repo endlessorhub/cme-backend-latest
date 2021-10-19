@@ -43,7 +43,7 @@ export class OrdersService {
             WHERE id = ${order.facility}
           `); */
 
-          const rows = _.uniq(await queryRunner.query(`
+          const rows: Array<any> = _.uniq(await queryRunner.query(`
             SELECT
               f.id,
               f.facility_type_id,
@@ -84,7 +84,7 @@ export class OrdersService {
             characteristics: {
               production_time: productionTime
             }
-          } = rows[0];
+          }: any = rows[0];
 
           const productionTimeAsMilliseconds = productionTime * 1000;
 

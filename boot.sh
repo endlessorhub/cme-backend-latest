@@ -14,7 +14,7 @@ else
     fi
 fi
 
-docker-compose up -d db adminer redis
+docker-compose start db adminer redis
 
 docker-compose up --build -d api ups uprod battles-manager
 

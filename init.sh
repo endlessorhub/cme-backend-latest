@@ -20,3 +20,6 @@ docker build - < ./dockerfile.base -t cme/app-base
 docker tag cme/app-base:latest localhost:5000/cme/app-base
 docker push localhost:5000/cme/app-base
 
+docker-compose up -d db adminer redis
+
+docker-compose up --build -d api ups uprod battles-manager

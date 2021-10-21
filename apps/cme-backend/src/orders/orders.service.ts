@@ -66,7 +66,7 @@ export class OrdersService {
               ON rtp.target_resource_type_id = rt.id
             LEFT JOIN villages_resource_types vrt
               ON f.village_id = vrt.village_id
-            WHERE f.id = ${order.facility}
+            WHERE f.id = ${order.facilityId}
             AND f.level = ftrt.level
             AND vrt.resource_type_id = rtp.source_resource_type_id
           `)); // Or rt.characteristics with DISTINCT clause , joining rt ON rtp.source_resource_type = rt.id to avoid handling deduplication in the code

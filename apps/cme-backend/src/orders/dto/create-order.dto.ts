@@ -15,7 +15,8 @@ export class CreateOrderDto {
 
     @ApiProperty()
     @IsNumber()
-    facility: Facility;
+    facilityId: number;
+
     @ApiProperty()
     @IsNumber()
     orderedQuantity: number;

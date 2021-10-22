@@ -71,11 +71,9 @@ export class OrdersService {
             AND vrt.resource_type_id = rtp.source_resource_type_id
           `)); // Or rt.characteristics with DISTINCT clause , joining rt ON rtp.source_resource_type = rt.id to avoid handling deduplication in the code
 
-          if (_.some(rows, row => row.count < row.amount * order.orderedQuantity)) {
+          if (_.some(rows, row => row.count < row.amount * order.orderedQuantity) || _.isEmpty(rows)) {
             throw new Error('Insufficient resources');
           }
-
-          console.log(rows);
 
           const {
             village_id: villageId,
@@ -104,6 +102,7 @@ export class OrdersService {
         `);
 
           order.resourceType = resourceTypeId;
+          order.facility = {id: order.facilityId}
           orderEntity = await queryRunner.manager.getRepository(Order).save(order);
           await queryRunner.commitTransaction();
           

@@ -10,8 +10,12 @@ export class CreateOrderDto {
 
     @Exclude()
     readonly deliveredQuantity: number = 0;
+
     @Exclude()
     resourceType: ResourceType;
+
+    @Exclude()
+    facility: Partial<Facility>;
 
     @ApiProperty()
     @IsNumber()

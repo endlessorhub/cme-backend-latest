@@ -1,0 +1,49 @@
+# You specify the stages.
+# Those are the steps that GitLab will go through 
+# Order matters a lot.
+stages:
+  #Self made at every commit
+  - staging 
+  #Must be triggered mannualy 
+  - production
+      
+deploy_to_preprod:
+  stage: staging
+  only:
+    - master
+  except:
+    - schedules
+  script:
+    - cd ..
+    - mkdir ~/.ssh
+    - cp $SSH_DEV_BACKEND ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa gitlab-ci@15.236.51.175 'echo "Command from GITLAB CI for dev env CME Backend" > /tmp/gitlab.tmp'
+    - tar -cvf cme-backend.tar cme-backend
+    - scp cme-backend.tar gitlab-ci@15.236.51.175:/home/gitlab-ci/
+    - ssh gitlab-ci@15.236.51.175 'tar -xvf /home/gitlab-ci/cme-backend.tar cme-backend'
+    - ssh gitlab-ci@15.236.51.175 'chmod u+x /home/gitlab-ci/cme-backend/init.sh'
+    - ssh gitlab-ci@15.236.51.175 'chmod u+x /home/gitlab-ci/cme-backend/boot.sh'
+    - ssh gitlab-ci@15.236.51.175 '/home/gitlab-ci/cme-backend/init.sh'
+    - ssh gitlab-ci@15.236.51.175 '/home/gitlab-ci/cme-backend/boot.sh'
+
+deploy_to_prod:
+  stage: production
+  only:
+    - master
+  except:
+    - schedules
+  script:
+    - cd ..
+    - mkdir ~/.ssh
+    - cp $SSH_FRONT_PROD_EC2 ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa gitlab-ci@35.181.56.30  'echo "Command from GITLAB CI for prod env" > /tmp/gitlab.tmp'
+    - tar -cvf front-end.tar front-end
+    - scp front-end.tar gitlab-ci@35.181.56.30:/home/gitlab-ci/
+    - ssh gitlab-ci@35.181.56.30 'tar -xvf /home/gitlab-ci/front-end.tar front-end'
+    - ssh gitlab-ci@35.181.56.30 'chmod +x /home/gitlab-ci/front-end/build_prod.sh'
+    - ssh gitlab-ci@35.181.56.30 '/home/gitlab-ci/front-end/build_prod.sh'
+    - ssh gitlab-ci@35.181.56.30 'sudo systemctl restart igloo-front'
+    - ssh gitlab-ci@35.181.56.30 'sudo systemctl status igloo-front'
+  when: manual

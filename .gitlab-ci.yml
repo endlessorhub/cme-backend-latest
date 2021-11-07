@@ -24,8 +24,8 @@ deploy_to_preprod:
     - ssh gitlab-ci@15.236.51.175 'tar -xvf /home/gitlab-ci/cme-backend.tar cme-backend'
     - ssh gitlab-ci@15.236.51.175 'chmod u+x /home/gitlab-ci/cme-backend/init.sh'
     - ssh gitlab-ci@15.236.51.175 'chmod u+x /home/gitlab-ci/cme-backend/boot.sh'
-    - ssh gitlab-ci@15.236.51.175 '/home/gitlab-ci/cme-backend/init.sh'
-    - ssh gitlab-ci@15.236.51.175 '/home/gitlab-ci/cme-backend/boot.sh'
+    - ssh gitlab-ci@15.236.51.175 'sudo /home/gitlab-ci/cme-backend/init.sh'
+    - ssh gitlab-ci@15.236.51.175 'sudo /home/gitlab-ci/cme-backend/boot.sh'
 
 deploy_to_prod:
   stage: production

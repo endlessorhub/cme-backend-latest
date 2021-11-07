@@ -14,7 +14,7 @@ else
     fi
 fi
 
-sudo docker-compose -f docker-compose.yml up -d db adminer redis
+sudo docker-compose -f /home/gitlab-ci/cme-backend/docker-compose.yml up -d db adminer redis
 
-sudo docker-compose -f docker-compose.yml up --build -d api ups uprod battles-manager
+sudo docker-compose -f /home/gitlab-ci/cme-backend/docker-compose.yml up --build -d api ups uprod battles-manager
 

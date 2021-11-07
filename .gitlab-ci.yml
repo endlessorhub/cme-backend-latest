@@ -10,7 +10,7 @@ stages:
 deploy_to_preprod:
   stage: staging
   only:
-    - master
+    - main
   except:
     - schedules
   script:

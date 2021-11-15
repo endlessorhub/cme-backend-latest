@@ -7,9 +7,11 @@ const computeCasualtiesForTeam = (
   casualtiesRatio: number,
 ) => {
   return _.mapValues(stakeholderUnitsInfoByType, (unitsInfo) => {
+    const count = Math.round(unitsInfo.count * casualtiesRatio);
+
     return {
       ...unitsInfo,
-      count: Math.round(unitsInfo.count * casualtiesRatio),
+      count: count <= unitsInfo.count ? count : unitsInfo.count,
     };
   });
 };
@@ -83,7 +85,7 @@ export const generateAttackReport = (
       attackerWon ? casualtiesRatio : 1,
     );
     defenderCasualties = computeCasualtiesForTeam(
-      attackerUnitsInfoByType,
+      defenderUnitsInfoByType,
       attackerWon ? 1 : casualtiesRatio,
     );
   }

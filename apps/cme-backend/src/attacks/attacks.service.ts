@@ -38,17 +38,23 @@ export class AttacksService {
       throw new Error('A user cannot attack themselve');
     }
 
-    const lastAttackOnDefenderVillage =
-      defenderVillage.attacksTo[defenderVillage.attacksTo.length - 1];
+    const lastAttackOnDefenderVillage = await this.attacksRepository.findOne({
+      order: { id: 'DESC' },
+    });
 
-    if (lastAttackOnDefenderVillage.isUnderAttack) {
+    if (lastAttackOnDefenderVillage?.isUnderAttack) {
       throw new Error('Defender village already under attack');
     }
 
     // check if the village has enough units and store the slowest speed
     let slowestSpeed = 0;
+    const unitSentKeys = Object.keys(createAttackDto.unitSent) || [];
 
-    Object.keys(createAttackDto.unitSent).forEach((resourceName) => {
+    if (unitSentKeys.length === 0) {
+      throw new Error('No unit sent to battle');
+    }
+
+    unitSentKeys.forEach((resourceName) => {
       const resourceRequested = createAttackDto.unitSent[resourceName];
       const resourceAvailable = attackerVillage.villagesResourceTypes?.find(
         (villageResourceType) =>

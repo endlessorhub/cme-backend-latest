@@ -75,7 +75,7 @@ export class BattlesManagerService {
       FROM (values ${attackerCasualtiesCount}) AS v(unit_type_id, returned_count)
       WHERE 
         vrt.village_id = ${attackerVillageId} AND
-        vrt.resource_type_id = v.unit_type_id
+        vrt.resource_type_id = v.unit_type_id;
 
       UPDATE attacks
       SET
@@ -116,7 +116,7 @@ export class BattlesManagerService {
       UPDATE attacks
       SET
         report = '${JSON.stringify({ unitsInfoByType, casualties })}',
-        is_under_attack = false
+        is_under_attack = false,
         is_troop_home = ${attackerWon ? 'FALSE' : 'TRUE'}
       WHERE
         id = ${attackId};

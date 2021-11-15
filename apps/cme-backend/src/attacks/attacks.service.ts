@@ -7,7 +7,6 @@ import { CreateAttackDto } from './dto/create-attack.dto';
 import { User } from '../users/user.entity';
 import { Village } from '../villages/village.entity';
 import { Attack } from './attack.entity';
-import { ResourceType } from '../resource-types/resource-type.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
 
 const HOUR_AS_MS = 60 * 60 * 1000;
@@ -39,10 +38,23 @@ export class AttacksService {
       throw new Error('A user cannot attack themselve');
     }
 
+    const lastAttackOnDefenderVillage = await this.attacksRepository.findOne({
+      order: { id: 'DESC' },
+    });
+
+    if (lastAttackOnDefenderVillage?.isUnderAttack) {
+      throw new Error('Defender village already under attack');
+    }
+
     // check if the village has enough units and store the slowest speed
     let slowestSpeed = 0;
+    const unitSentKeys = Object.keys(createAttackDto.unitSent) || [];
 
-    Object.keys(createAttackDto.unitSent).forEach((resourceName) => {
+    if (unitSentKeys.length === 0) {
+      throw new Error('No unit sent to battle');
+    }
+
+    unitSentKeys.forEach((resourceName) => {
       const resourceRequested = createAttackDto.unitSent[resourceName];
       const resourceAvailable = attackerVillage.villagesResourceTypes?.find(
         (villageResourceType) =>
@@ -66,7 +78,7 @@ export class AttacksService {
 
     const distance = Math.sqrt(
       Math.pow(defenderVillage.x - attackerVillage.x, 2) +
-      Math.pow(defenderVillage.y - attackerVillage.y, 2)
+        Math.pow(defenderVillage.y - attackerVillage.y, 2),
     );
 
     const attack = {
@@ -109,8 +121,7 @@ export class AttacksService {
         }
 
         const countLeftDuringAttack =
-          villageResourceType.count -
-          resourceRequested.count;
+          villageResourceType.count - resourceRequested.count;
 
         villageResourceType.count = countLeftDuringAttack;
 
@@ -119,11 +130,11 @@ export class AttacksService {
     );
 
     // Save the updated resourceTypes.
-    await this.villagesResourceTypesRepository.save(
-      attackerVillageResourceTypesLeftDuringAttack,
-    ).catch(e => {
-      console.log(e);
-    });
+    await this.villagesResourceTypesRepository
+      .save(attackerVillageResourceTypesLeftDuringAttack)
+      .catch((e) => {
+        console.log(e);
+      });
 
     // Save the new attack.
     return this.attacksRepository.save(attack);

@@ -1,6 +1,9 @@
+#Should be executed as sudo and be downloaded apart
+
 echo "Cloning Repo"
 mkdir /home/gitlab-ci
 cd /home/gitlab-ci
+rm -r /home/gitlab-ci/cme-backend
 git clone https://gitlab+deploy-token-635521:PSUbjHSvT4s9DYBkS4Pm@gitlab.com/samy.f/cme-backend.git
 cd cme-backend
 

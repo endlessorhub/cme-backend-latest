@@ -51,6 +51,81 @@ export class BattlesManagerService {
     );
   }
 
+  async updateAttackerStolenResourcesAfterReturnSql(
+    attackId,
+    attackerVillageId,
+    defenderVillageId,
+  ) {
+    const defenderResourcesInfo = await this.queryRunner.query(`
+      SELECT
+        vrt.resource_type_id AS "resourceTypeId",
+        rt.type AS "resourceTypeName",
+        vrt.count
+      FROM
+        villages_resource_types vrt
+      JOIN resource_types rt ON vrt.resource_type_id = rt.id
+      WHERE (
+        vrt.village_id = ${defenderVillageId} AND
+        rt.characteristics IS NULL
+      )
+    `);
+
+    const stolenResources = [];
+
+    /**
+     * stolenResources will look like:
+     * [
+     *  { id: 1, count: 5 },
+     *  { id: 2, count: 2 },
+     *  { id: 3, count: 3 },
+     * ];
+     */
+    defenderResourcesInfo.forEach((res) => {
+      if (['food', 'iron', 'wood'].indexOf(res.resourceTypeName) !== -1) {
+        // Steal 5% of each resource.
+        const count = Math.round(Number(res.count) / 20);
+
+        stolenResources.push({
+          id: res.resourceTypeId,
+          count,
+        });
+      }
+    });
+
+    const stolenResourcesFormatted = Object.values(stolenResources).reduce(
+      (acc, { id, count }, i) => {
+        return `${acc}${i === 0 ? '' : ','}(${id},${count})`;
+      },
+      '',
+    );
+
+    await this.queryRunner.query(`
+      UPDATE villages_resource_types AS vrt
+      SET
+        count = count + v.stolen_count,
+        updated_at = NOW()
+        FROM (values ${stolenResourcesFormatted}) AS v(resource_type_id, stolen_count)
+      WHERE
+        vrt.village_id = ${attackerVillageId} AND
+        vrt.resource_type_id = v.resource_type_id;
+
+      UPDATE villages_resource_types AS vrt
+      SET
+        count = count - v.stolen_count,
+        updated_at = NOW()
+        FROM (values ${stolenResourcesFormatted}) AS v(resource_type_id, stolen_count)
+      WHERE
+        vrt.village_id = ${defenderVillageId} AND
+        vrt.resource_type_id = v.resource_type_id;
+  
+      UPDATE attacks
+      SET
+        stolen_resources = '${JSON.stringify({ resources: stolenResources })}'
+      WHERE
+        id = ${attackId};
+    `);
+  }
+
   async updateAttackerValuesAfterReturnAsSql(
     unitsInfoByType: unitInfoByType,
     casualties: casualtiesInfoByUnitTypeId,
@@ -79,7 +154,8 @@ export class BattlesManagerService {
 
       UPDATE attacks
       SET
-        is_troop_home = TRUE
+        is_troop_home = TRUE,
+        attacker_won = TRUE
       WHERE
         id = ${attackId};
     `);
@@ -134,6 +210,7 @@ export class BattlesManagerService {
             attackerUnitsInfoByType: unitsInfoByType[attackerVillageId],
             attackerCasualties:
               casualties[attackerVillageId].casualtiesInfoByUnitTypeId,
+            defenderVillageId,
             queue: 'pending:return',
           }),
         )
@@ -218,7 +295,14 @@ export class BattlesManagerService {
       attackerUnitsInfoByType,
       attackerCasualties,
       attackId,
+      defenderVillageId,
     } = parsed;
+
+    this.updateAttackerStolenResourcesAfterReturnSql(
+      attackId,
+      attackerVillageId,
+      defenderVillageId,
+    );
 
     this.updateAttackerValuesAfterReturnAsSql(
       attackerUnitsInfoByType,

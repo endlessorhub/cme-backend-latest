@@ -11,7 +11,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { AttacksService } from './attacks.service';
 import { CreateAttackDto } from './dto/create-attack.dto';
-import { UserAttackssummaryDto } from './usersummary.util';
+import { UserAttackssummaryDto } from './userSummary.util';
 
 @ApiBearerAuth()
 @Controller('attacks')

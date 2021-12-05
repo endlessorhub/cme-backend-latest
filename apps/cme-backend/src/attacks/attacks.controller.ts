@@ -1,8 +1,17 @@
-import { Controller, Get, Post, Body, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Delete,
+  Request,
+} from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { AttacksService } from './attacks.service';
 import { CreateAttackDto } from './dto/create-attack.dto';
+import { UserAttackssummaryDto } from './userSummary.util';
 
 @ApiBearerAuth()
 @Controller('attacks')
@@ -17,6 +26,12 @@ export class AttacksController {
   @Get()
   findAll() {
     return this.attacksService.findAll();
+  }
+
+  // Needs to be declared before /:id to avoid conflict.
+  @Get('summary')
+  summary(@Request() req): Promise<UserAttackssummaryDto> {
+    return this.attacksService.userAttackssummary(req);
   }
 
   @Get(':id')

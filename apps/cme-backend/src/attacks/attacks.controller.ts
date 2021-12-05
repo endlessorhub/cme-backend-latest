@@ -11,7 +11,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 
 import { AttacksService } from './attacks.service';
 import { CreateAttackDto } from './dto/create-attack.dto';
-import { UserAttacksSumarryDto } from './userSumarry.util';
+import { UserAttackssummaryDto } from './usersummary.util';
 
 @ApiBearerAuth()
 @Controller('attacks')
@@ -29,9 +29,9 @@ export class AttacksController {
   }
 
   // Needs to be declared before /:id to avoid conflict.
-  @Get('sumarry')
-  sumarry(@Request() req): Promise<UserAttacksSumarryDto> {
-    return this.attacksService.userAttacksSumarry(req);
+  @Get('summary')
+  summary(@Request() req): Promise<UserAttackssummaryDto> {
+    return this.attacksService.userAttackssummary(req);
   }
 
   @Get(':id')

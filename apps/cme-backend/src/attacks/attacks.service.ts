@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Request } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
@@ -8,6 +8,12 @@ import { User } from '../users/user.entity';
 import { Village } from '../villages/village.entity';
 import { Attack } from './attack.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
+import {
+  formatSimplerAttackEntity,
+  formatSimplerAttackList,
+  UserAttackssummaryDto,
+} from './userSummary.util';
+import { isEmpty } from 'lodash';
 
 const HOUR_AS_MS = 60 * 60 * 1000;
 
@@ -145,15 +151,58 @@ export class AttacksService {
     return this.attacksRepository.find();
   }
 
+  /**
+   * This method returns a summary of an attack
+   *
+   * !WARNING!: this logic is a very basic and not very optimized version, it will need a good update,
+   * with a specific Postgres request.
+   */
+  async userAttackssummary(@Request() req): Promise<UserAttackssummaryDto> {
+    const userRequesting: User = req.user;
+
+    // made
+    const lastFiveAttacksMade: ReadonlyArray<Attack> = await this.attacksRepository.find(
+      {
+        where: [{ attacker: { id: userRequesting.id }, isUnderAttack: false }],
+        take: 5,
+        order: { id: 'DESC' },
+      },
+    );
+    const inProgressMade: ReadonlyArray<Attack> = await this.attacksRepository.find(
+      {
+        where: [{ attacker: { id: userRequesting.id }, isUnderAttack: true }],
+        order: { id: 'DESC' },
+      },
+    );
+
+    // Suffered
+    const lastFiveAttacksSuffered: ReadonlyArray<Attack> = await this.attacksRepository.find(
+      {
+        where: [{ defender: { id: userRequesting.id }, isUnderAttack: false }],
+        take: 5,
+        order: { id: 'DESC' },
+      },
+    );
+    const inProgressSuffered: Attack = await this.attacksRepository.findOne({
+      where: [{ defender: { id: userRequesting.id }, isUnderAttack: true }],
+      order: { id: 'DESC' },
+    });
+
+    return {
+      inProgress: {
+        made: formatSimplerAttackList(inProgressMade),
+        suffered: isEmpty(inProgressSuffered)
+          ? null
+          : formatSimplerAttackEntity(inProgressSuffered),
+      },
+      lastFiveAttacksMade: formatSimplerAttackList(lastFiveAttacksMade),
+      lastFiveAttacksSuffered: formatSimplerAttackList(lastFiveAttacksSuffered),
+    };
+  }
+
   findOne(id: string) {
     return this.attacksRepository.findOne(id);
   }
-
-  // Todo: when the combat system is ready, find a way to update the attack_time + other values from here.
-  //
-  // update(id: number, updateAttackDto: UpdateAttackDto) {
-  //   return `This action updates a #${id} attack`;
-  // }
 
   async remove(id: string): Promise<void> {
     await this.attacksRepository.delete(id);

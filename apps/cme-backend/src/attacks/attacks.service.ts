@@ -11,8 +11,8 @@ import { VillageResourceType } from '../villages-resource-types/village-resource
 import {
   formatSimplerAttackEntity,
   formatSimplerAttackList,
-  UserAttacksSumarryDto,
-} from './userSumarry.util';
+  UserAttackssummaryDto,
+} from './usersummary.util';
 import { isEmpty } from 'lodash';
 
 const HOUR_AS_MS = 60 * 60 * 1000;
@@ -152,12 +152,12 @@ export class AttacksService {
   }
 
   /**
-   * This method returns a sumarry of an attack
+   * This method returns a summary of an attack
    *
    * !WARNING!: this logic is a very basic and not very optimized version, it will need a good update,
    * with a specific Postgres request.
    */
-  async userAttacksSumarry(@Request() req): Promise<UserAttacksSumarryDto> {
+  async userAttackssummary(@Request() req): Promise<UserAttackssummaryDto> {
     const userRequesting: User = req.user;
 
     // made

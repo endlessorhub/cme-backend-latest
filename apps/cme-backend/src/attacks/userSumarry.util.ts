@@ -12,7 +12,7 @@ type AttacksInProgress = Readonly<{
   made: ReadonlyArray<PartialAttack>;
 }>;
 
-export type UserAttacksSumarryDto = Readonly<{
+export type UserAttackssummaryDto = Readonly<{
   // Filled with an ongoing attack to the user's village if existing,
   // and ongoing attacks made to other villages, if existing too.
   inProgress: AttacksInProgress;

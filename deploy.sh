@@ -16,6 +16,9 @@ echo "Making executables"
 chmod u+x /home/gitlab-ci/cme-backend/init.sh
 chmod u+x /home/gitlab-ci/cme-backend/boot.sh
 
+echo "Deleting previous api"
+docker container rm api
+
 echo "Building dockers"
 ./init.sh
 

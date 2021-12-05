@@ -93,6 +93,7 @@ export class AttacksService {
     const redisClient = await this.redisService.getClient();
     const travelTimeAsHours = distance / slowestSpeed;
     const travelTimeAsMs = Math.round(travelTimeAsHours * HOUR_AS_MS);
+    // const travelTimeAsMs = 0; // For faster tests
 
     await redisClient
       .zadd(

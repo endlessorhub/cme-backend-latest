@@ -42,6 +42,22 @@ export class Attack {
   })
   isUnderAttack: boolean;
 
+  @Column({
+    name: 'is_troop_home',
+  })
+  isTroopHome: boolean;
+
+  @Column({
+    name: 'attacker_won',
+  })
+  attackerWon: boolean;
+
+  @Column({
+    type: 'json',
+    name: 'stolen_resources',
+  })
+  stolenResources: Record<string, any>; // TODO: create a TS type for the stolen resources
+
   // Attacker data
 
   @ManyToOne(() => Village, (village) => village.attacksFrom, {

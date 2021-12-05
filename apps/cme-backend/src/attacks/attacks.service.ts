@@ -12,7 +12,7 @@ import {
   formatSimplerAttackEntity,
   formatSimplerAttackList,
   UserAttackssummaryDto,
-} from './usersummary.util';
+} from './userSummary.util';
 import { isEmpty } from 'lodash';
 
 const HOUR_AS_MS = 60 * 60 * 1000;

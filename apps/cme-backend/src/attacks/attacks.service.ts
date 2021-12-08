@@ -1,4 +1,4 @@
-import { Injectable, Request } from '@nestjs/common';
+import { Injectable, Request, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
@@ -41,7 +41,10 @@ export class AttacksService {
     );
 
     if (attackerVillage.user.id === defenderVillage.user.id) {
-      throw new Error('A user cannot attack themselve');
+      throw new HttpException(
+        'A user cannot attack themselve',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     const lastAttackOnDefenderVillage = await this.attacksRepository.findOne({
@@ -49,7 +52,10 @@ export class AttacksService {
     });
 
     if (lastAttackOnDefenderVillage?.isUnderAttack) {
-      throw new Error('Defender village already under attack');
+      throw new HttpException(
+        'Defender village already under attack',
+        HttpStatus.BAD_REQUEST,
+      );
     }
 
     // check if the village has enough units and store the slowest speed
@@ -57,7 +63,7 @@ export class AttacksService {
     const unitSentKeys = Object.keys(createAttackDto.unitSent) || [];
 
     if (unitSentKeys.length === 0) {
-      throw new Error('No unit sent to battle');
+      throw new HttpException('No unit sent to battle', HttpStatus.BAD_REQUEST);
     }
 
     unitSentKeys.forEach((resourceName) => {
@@ -71,7 +77,10 @@ export class AttacksService {
         !resourceAvailable ||
         resourceAvailable.count < resourceRequested.count
       ) {
-        throw new Error(`Quantity of unit ${resourceName} insuficient`);
+        throw new HttpException(
+          `Quantity of unit ${resourceName} insuficient`,
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       if (

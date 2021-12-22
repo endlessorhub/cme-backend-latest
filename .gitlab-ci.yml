@@ -18,9 +18,9 @@ deploy_to_preprod:
     - mkdir ~/.ssh
     - cp $SSH_DEV_BACKEND ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa admin@35.180.67.20 'echo "Command from GITLAB CI for dev env CME Backend" > /tmp/gitlab.tmp'
-    - scp cme-backend/deploy.sh admin@35.180.67.20:/home/admin/deploy.sh
-    - ssh admin@35.180.67.20 'sudo /home/admin/deploy.sh'
+    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa admin@$IP_DEV 'echo "Command from GITLAB CI for dev env CME Backend" > /tmp/gitlab.tmp'
+    - scp cme-backend/deploy.sh admin@$IP_DEV:/home/admin/deploy.sh
+    - ssh admin@$IP_DEV 'sudo /home/admin/deploy.sh'
 
 deploy_to_prod:
   stage: production

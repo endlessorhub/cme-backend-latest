@@ -9,6 +9,7 @@ stages:
       
 deploy_to_preprod:
   stage: staging
+  retry_on_failure: true
   only:
     - main
   except:
@@ -24,6 +25,7 @@ deploy_to_preprod:
 
 deploy_to_prod:
   stage: production
+  retry_on_failure: true
   only:
     - main
   except:

@@ -25,20 +25,15 @@ deploy_to_preprod:
 deploy_to_prod:
   stage: production
   only:
-    - master
+    - main
   except:
     - schedules
   script:
     - cd ..
     - mkdir ~/.ssh
-    - cp $SSH_FRONT_PROD_EC2 ~/.ssh/id_rsa
+    - cp $SSH_PROD_BACKEND ~/.ssh/id_rsa
     - chmod 600 ~/.ssh/id_rsa
-    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa gitlab-ci@35.181.56.30  'echo "Command from GITLAB CI for prod env" > /tmp/gitlab.tmp'
-    - tar -cvf front-end.tar front-end
-    - scp front-end.tar gitlab-ci@35.181.56.30:/home/gitlab-ci/
-    - ssh gitlab-ci@35.181.56.30 'tar -xvf /home/gitlab-ci/front-end.tar front-end'
-    - ssh gitlab-ci@35.181.56.30 'chmod +x /home/gitlab-ci/front-end/build_prod.sh'
-    - ssh gitlab-ci@35.181.56.30 '/home/gitlab-ci/front-end/build_prod.sh'
-    - ssh gitlab-ci@35.181.56.30 'sudo systemctl restart igloo-front'
-    - ssh gitlab-ci@35.181.56.30 'sudo systemctl status igloo-front'
+    - ssh -oStrictHostKeyChecking=no -i ~/.ssh/id_rsa admin@$IP_PROD 'echo "Command from GITLAB CI for dev env CME Backend" > /tmp/gitlab.tmp'
+    - scp cme-backend/deploy.sh admin@$IP_PROD:/home/admin/deploy.sh
+    - ssh admin@$IP_PROD 'sudo /home/admin/deploy.sh'
   when: manual

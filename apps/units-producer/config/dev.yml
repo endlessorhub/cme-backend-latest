@@ -19,4 +19,5 @@ typeorm:
       migrationsDir: "migrations"
   }
   synchronize: false
-  logging: ["error", "warn", "query"]
+  #logging: ["error", "warn", "query"]
+  logging: ["error", "warn"]

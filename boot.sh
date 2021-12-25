@@ -1,4 +1,5 @@
 #!/bin/bash
+echo "Booting $1 environment"
 
 if [ "$(uname)" == "Darwin" ]; then
     # For macos users
@@ -14,7 +15,7 @@ else
     fi
 fi
 
-docker-compose start db adminer redis
+ENV=$1 docker-compose start db adminer redis 
 
-docker-compose up --build -d api ups uprod battles-manager
+ENV=$1 docker-compose up --build -d api ups uprod battles-manager 
 

@@ -8,7 +8,7 @@ services:
     build:
       context: ./apps/cme-backend
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3000:3000
     volumes:
@@ -27,7 +27,7 @@ services:
     build:
       context: ./apps/units-production-scheduler
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3001:3001
     volumes:
@@ -45,7 +45,7 @@ services:
     build:
       context: ./apps/units-producer
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3002:3002
     volumes:
@@ -56,7 +56,7 @@ services:
     build:
       context: ./apps/battles-manager
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3003:3003
     volumes:

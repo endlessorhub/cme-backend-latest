@@ -19,6 +19,9 @@ chmod u+x /home/gitlab-ci/cme-backend/boot.sh
 echo "Deleting previous api"
 docker container rm api
 
+echo "Deleting previous battle-manager"
+docker container rm bm
+
 echo "Building dockers"
 ./init.sh
 

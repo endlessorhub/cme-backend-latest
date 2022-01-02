@@ -1,5 +1,13 @@
 #!/bin/bash
-echo "Booting $1 environment"
+
+#Dev by default
+if [ -z "${1}" ]; then 
+    ENV='dev'
+else 
+    ENV=${1}
+fi
+
+echo "Booting $ENV environment"
 
 if [ "$(uname)" == "Darwin" ]; then
     # For macos users

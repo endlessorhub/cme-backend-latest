@@ -22,6 +22,12 @@ docker container rm api
 echo "Deleting previous battle-manager"
 docker container rm bm
 
+echo "Deleting previous ups"
+docker container rm ups
+
+echo "Deleting previous uprod"
+docker container rm uprod
+
 echo "Building dockers"
 ./init.sh
 

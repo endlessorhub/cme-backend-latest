@@ -102,6 +102,6 @@ To do that:
 * A review will be done, some changes might be required before approval
 * Once you have approval, you can merge it to the main branch (don't forget to rebase if you see any issue blocking the merge)
 
-## How to: launch the project in proper environement
+## How to: launch the project in the proper environement
 * If it is a new project, use deploy.sh script to init the script, use "dev" "prod" argument to provide env. Default is dev
 * If not, use down.sh without arg, init.sh [env], boot.sh [env]

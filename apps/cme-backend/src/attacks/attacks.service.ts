@@ -48,6 +48,7 @@ export class AttacksService {
     }
 
     const lastAttackOnDefenderVillage = await this.attacksRepository.findOne({
+      where: { defenderVillage: { id: defenderVillage.id } },
       order: { id: 'DESC' },
     });
 

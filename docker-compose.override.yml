@@ -4,7 +4,7 @@ services:
 
   api:
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3000:3000
     volumes:

@@ -1,5 +1,15 @@
 #Should be executed as sudo and be downloaded apart
 
+#Dev by default
+if [ -z "${1}" ]; then 
+    ENV='dev'
+else 
+    ENV=${1}
+fi
+
+echo "Deploying APP in $ENV environment"
+
+
 echo "Deleting previous repo"
 rm -r /home/gitlab-ci/cme-backend
 echo "Cloning Repo"
@@ -29,7 +39,7 @@ echo "Deleting previous uprod"
 docker container rm uprod
 
 echo "Building dockers"
-./init.sh
+./init.sh $ENV
 
 echo "Booting dockers"
-./boot.sh
+./boot.sh $ENV

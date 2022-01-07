@@ -1,5 +1,14 @@
 #!/bin/bash
 
+#Dev by default
+if [ -z "${1}" ]; then 
+    ENV='dev'
+else 
+    ENV=${1}
+fi
+
+echo "Booting $ENV environment"
+
 if [ "$(uname)" == "Darwin" ]; then
     # For macos users
     DOCKER_STATUS=$(echo $(launchctl status docker | grep Active) | cut -d' ' -f2)
@@ -14,7 +23,7 @@ else
     fi
 fi
 
-docker-compose start db adminer redis
+ENV=$1 docker-compose start db adminer redis 
 
-docker-compose up --build -d api ups uprod battles-manager
+ENV=$1 docker-compose up --build -d api ups uprod battles-manager 
 

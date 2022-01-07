@@ -8,7 +8,7 @@ services:
     build:
       context: ./apps/cme-backend
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3000:3000
     volumes:
@@ -27,7 +27,7 @@ services:
     build:
       context: ./apps/units-production-scheduler
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3001:3001
     volumes:
@@ -45,7 +45,7 @@ services:
     build:
       context: ./apps/units-producer
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3002:3002
     volumes:
@@ -56,7 +56,7 @@ services:
     build:
       context: ./apps/battles-manager
     environment:
-      NODE_ENV: dev
+      NODE_ENV: ${ENV}
     ports:
       - 3003:3003
     volumes:
@@ -68,6 +68,7 @@ services:
     restart: always
     environment:
       POSTGRES_PASSWORD: example
+      NODE_ENV: ${ENV}
     ports:
       - 5432:5432
     working_dir: /home
@@ -77,6 +78,8 @@ services:
 
   adminer:
     container_name: adminer
+    environment:
+      NODE_ENV: ${ENV}
     image: adminer
     restart: always
     ports:
@@ -87,6 +90,8 @@ services:
     image: redis:6.2-buster
     command: redis-server --requirepass 96104305cdf1e02badc378cef3f60f23319d1600a6de13f71f120e476061dba3
     restart: always
+    environment:
+      NODE_ENV: ${ENV}
     sysctls:
       net.core.somaxconn: 511
     ports:

@@ -22,7 +22,7 @@ export class AppController {
   })
   @Post('auth/login')
   async login(@Request() req) {
-    this.logger.log(`Login attempt for user: ${req.user.username}`);
+    this.logger.log(`Login attempt for user with login => ${req.user.username}`);
     return this.authService.login(req.user);
   }
 }

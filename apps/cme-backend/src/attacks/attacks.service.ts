@@ -15,7 +15,7 @@ import {
 } from './userSummary.util';
 import { isEmpty } from 'lodash';
 
-const HOUR_AS_MS = 60 * 60 * 1000;
+// const HOUR_AS_MS = 60 * 60 * 1000;
 
 @Injectable()
 export class AttacksService {
@@ -97,19 +97,31 @@ export class AttacksService {
         Math.pow(defenderVillage.y - attackerVillage.y, 2),
     );
 
-    const attack = {
+    const redisClient = await this.redisService.getClient();
+    const travelTimeAsHours = distance / slowestSpeed;
+    // const travelTimeAsMs = Math.round(travelTimeAsHours * HOUR_AS_MS);
+    const travelTimeAsMs = Math.round(travelTimeAsHours * 1000 * 60); // For the moment, it transforms 1 hour into 1 minute
+
+    // additional log for prod test
+    console.log(
+      '========================== should set a travel time',
+      `distance = ${distance} (def x = ${defenderVillage.x}, att x = ${attackerVillage.x}, def y = ${defenderVillage.y}, att y = ${attackerVillage.y}), slowest speed = ${slowestSpeed}`,
+      `travel time as hours = ${travelTimeAsHours}`,
+      `and as ms = ${travelTimeAsMs}`,
+      `we're ${new Date()}`,
+      `so date should be ${new Date(Date.now() + travelTimeAsMs)}`,
+    );
+
+    const attack: Partial<Attack> = {
       attackerVillage,
       attacker: attackerVillage.user,
       defenderVillage,
       defender: defenderVillage.user,
       unitSent: createAttackDto.unitSent,
+      attackTime: new Date(Date.now() + travelTimeAsMs),
     };
 
     const attackEntity = await this.attacksRepository.save(attack);
-    const redisClient = await this.redisService.getClient();
-    const travelTimeAsHours = distance / slowestSpeed;
-    const travelTimeAsMs = Math.round(travelTimeAsHours * HOUR_AS_MS);
-    // const travelTimeAsMs = 0; // For faster tests
 
     await redisClient
       .zadd(

@@ -172,14 +172,16 @@ export class BattlesManagerService {
       casualties,
     } = attackFinalReport;
 
+    let sqlQuery = '';
+
     const defenderCasualtiesCount = this.getUpdateValuesAsSql(
       casualties[defenderVillageId].casualtiesInfoByUnitTypeId,
     );
 
-    const attackerWon = attackerVillageId === winnerVillageId;
-
-    // Update the defender village resources
-    await this.queryRunner.query(`
+    if (defenderCasualtiesCount) {
+      sqlQuery =
+        sqlQuery +
+        `
       UPDATE villages_resource_types AS vrt
       SET
         count = count - v.casualties,
@@ -187,16 +189,25 @@ export class BattlesManagerService {
       FROM (values ${defenderCasualtiesCount}) AS v(unit_type_id, casualties)
       WHERE 
         vrt.village_id = ${defenderVillageId} AND
-        vrt.resource_type_id = v.unit_type_id;
+        vrt.resource_type_id = v.unit_type_id;`;
+    }
 
-      UPDATE attacks
+    const attackerWon = attackerVillageId === winnerVillageId;
+
+    sqlQuery =
+      sqlQuery +
+      `
+    UPDATE attacks
       SET
         report = '${JSON.stringify({ unitsInfoByType, casualties })}',
         is_under_attack = false,
         is_troop_home = ${attackerWon ? 'FALSE' : 'TRUE'}
       WHERE
         id = ${attackId};
-    `);
+    `;
+
+    // Update the defender village resources
+    await this.queryRunner.query(sqlQuery);
 
     // Update the attacker village resources, but only after they returned
     if (attackerWon) {

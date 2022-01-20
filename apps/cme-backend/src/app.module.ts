@@ -20,6 +20,7 @@ import { IndustriesModule } from './industries/industries.module';
 import { AttacksModule } from './attacks/attacks.module';
 import { ConfigurationModule } from '@app/configuration';
 import { ConfigurationService } from '@app/configuration';
+import { PublicModule } from './public/public.module';
 import * as path from 'path';
 
 @Module({
@@ -53,6 +54,7 @@ import * as path from 'path';
     OrdersModule,
     IndustriesModule,
     AttacksModule,
+    PublicModule,
   ],
   controllers: [AppController],
   providers: [AppService],

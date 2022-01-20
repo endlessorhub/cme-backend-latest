@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
 
-import { CreateAttackDto } from './dto/create-attack.dto';
+import { CreateAttackDto, DevTravelTimeMode } from './dto/create-attack.dto';
 import { User } from '../users/user.entity';
 import { Village } from '../villages/village.entity';
 import { Attack } from './attack.entity';
@@ -14,8 +14,32 @@ import {
   UserAttackssummaryDto,
 } from './userSummary.util';
 import { isEmpty } from 'lodash';
+import { env } from 'process';
 
 // const HOUR_AS_MS = 60 * 60 * 1000;
+
+const computeAttackTime = (
+  distance: number,
+  slowestSpeed: number,
+  mode: DevTravelTimeMode = DevTravelTimeMode.DEFAULT,
+): number => {
+  const travelTimeAsHours = distance / slowestSpeed;
+
+  if (env.NODE_ENV === 'dev' && mode !== DevTravelTimeMode.DEFAULT) {
+    switch (mode) {
+      case DevTravelTimeMode.INSTANT:
+        return 0;
+      case DevTravelTimeMode.HOURS_AS_MINUTES:
+        return Math.round(travelTimeAsHours * 1000 * 60);
+      default:
+        break;
+    }
+  }
+
+  // When ready to have hours-long attacks moves, replace this by
+  // return Math.round(travelTimeAsHours * HOUR_AS_MS)
+  return Math.round(travelTimeAsHours * 1000 * 60);
+};
 
 @Injectable()
 export class AttacksService {
@@ -97,19 +121,10 @@ export class AttacksService {
         Math.pow(defenderVillage.y - attackerVillage.y, 2),
     );
 
-    const redisClient = await this.redisService.getClient();
-    const travelTimeAsHours = distance / slowestSpeed;
-    // const travelTimeAsMs = Math.round(travelTimeAsHours * HOUR_AS_MS);
-    const travelTimeAsMs = Math.round(travelTimeAsHours * 1000 * 60); // For the moment, it transforms 1 hour into 1 minute
-
-    // additional log for prod test
-    console.log(
-      '========================== should set a travel time',
-      `distance = ${distance} (def x = ${defenderVillage.x}, att x = ${attackerVillage.x}, def y = ${defenderVillage.y}, att y = ${attackerVillage.y}), slowest speed = ${slowestSpeed}`,
-      `travel time as hours = ${travelTimeAsHours}`,
-      `and as ms = ${travelTimeAsMs}`,
-      `we're ${new Date()}`,
-      `so date should be ${new Date(Date.now() + travelTimeAsMs)}`,
+    const travelTimeAsMs = computeAttackTime(
+      distance,
+      slowestSpeed,
+      createAttackDto?.devConfig?.attackTimeMode,
     );
 
     const attack: Partial<Attack> = {
@@ -123,6 +138,7 @@ export class AttacksService {
 
     const attackEntity = await this.attacksRepository.save(attack);
 
+    const redisClient = await this.redisService.getClient();
     await redisClient
       .zadd(
         `delayed:normal`,

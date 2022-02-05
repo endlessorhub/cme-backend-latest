@@ -81,7 +81,9 @@ export class BattlesManagerService {
      * ];
      */
     defenderResourcesInfo.forEach((res) => {
-      if (['food', 'iron', 'wood'].indexOf(res.resourceTypeName) !== -1) {
+      if (
+        ['food', 'iron', 'wood', 'mkc'].indexOf(res.resourceTypeName) !== -1
+      ) {
         // Steal 5% of each resource.
         const count = Math.round(Number(res.count) / 20);
 

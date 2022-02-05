@@ -71,18 +71,6 @@ export class AttacksService {
       );
     }
 
-    const lastAttackOnDefenderVillage = await this.attacksRepository.findOne({
-      where: { defenderVillage: { id: defenderVillage.id } },
-      order: { id: 'DESC' },
-    });
-
-    if (lastAttackOnDefenderVillage?.isUnderAttack) {
-      throw new HttpException(
-        'Defender village already under attack',
-        HttpStatus.BAD_REQUEST,
-      );
-    }
-
     // check if the village has enough units and store the slowest speed
     let slowestSpeed = 0;
     const unitSentKeys = Object.keys(createAttackDto.unitSent) || [];

@@ -38,6 +38,9 @@ docker container rm ups
 echo "Deleting previous uprod"
 docker container rm uprod
 
+echo "Deleting previous resources-ms"
+docker container rm resources-ms
+
 echo "Building dockers"
 ./init.sh $ENV
 

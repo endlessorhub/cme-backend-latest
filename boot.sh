@@ -25,5 +25,5 @@ fi
 
 ENV=$1 docker-compose start db adminer redis 
 
-ENV=$1 docker-compose up --build -d api ups uprod battles-manager 
+ENV=$1 docker-compose up --build -d api ups uprod battles-manager resources-ms
 

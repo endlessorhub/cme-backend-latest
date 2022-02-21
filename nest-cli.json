@@ -17,7 +17,7 @@
         "tsConfigPath": "apps/cme-backend/tsconfig.app.json",
         "assets": [
           {
-            "include": "../../../config/*.yml",
+            "include": "../config/*.yml",
             "watchAssets": true,
             "outDir": "dist/apps/cme-backend/config"
           }
@@ -33,7 +33,7 @@
         "tsConfigPath": "apps/units-production-scheduler/tsconfig.app.json",
         "assets": [
           {
-            "include": "../../../config/*.yml",
+            "include": "../config/*.yml",
             "watchAssets": true,
             "outDir": "dist/apps/units-production-scheduler/config"
           }
@@ -49,7 +49,7 @@
         "tsConfigPath": "apps/units-producer/tsconfig.app.json",
         "assets": [
           {
-            "include": "../../../config/*.yml",
+            "include": "../config/*.yml",
             "watchAssets": true,
             "outDir": "dist/apps/units-producer/config"
           }
@@ -92,9 +92,25 @@
         "tsConfigPath": "apps/battles-manager/tsconfig.app.json",
         "assets": [
           {
-            "include": "../../../config/*.yml",
+            "include": "../config/*.yml",
             "watchAssets": true,
             "outDir": "dist/apps/battles-manager/config"
+          }
+        ]
+      }
+    },
+    "resources-ms": {
+      "type": "application",
+      "root": "apps/resources-ms",
+      "entryFile": "main",
+      "sourceRoot": "apps/resources-ms/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/resources-ms/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/resources-ms/config"
           }
         ]
       }

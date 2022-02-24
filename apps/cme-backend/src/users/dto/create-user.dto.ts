@@ -2,8 +2,6 @@ import { IsEmpty, IsOptional, IsString } from 'class-validator';
 import { Village } from '../../villages/village.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-import { IsEmail } from "class-validator";
-
 export class CreateUserDto {
     @IsEmpty()
     id: number;
@@ -18,7 +16,6 @@ export class CreateUserDto {
     ethWalletAddresses: Record<string, any>;
 
     @IsOptional()
-    @IsEmail()
     email: string;
 
     @ApiProperty()
@@ -28,9 +25,4 @@ export class CreateUserDto {
     @ApiProperty()
     @IsString()
     password: string;
-
-    email_verification_token: string;
-
-    
-
 }

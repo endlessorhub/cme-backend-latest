@@ -45,13 +45,4 @@ export class User {
 
   @OneToMany(() => Attack, (attack) => attack.defender)
   attacksTo: Village[];
-
-  @Column({ default: false })
-  email_confirmed: boolean;
-
-  @Column({ type: 'timestamptz'})
-  email_confirmed_at: Date;
-
-  @Column({})
-  email_verification_token: string
 }

@@ -21,6 +21,7 @@ import { AttacksModule } from './attacks/attacks.module';
 import { ConfigurationModule } from '@app/configuration';
 import { ConfigurationService } from '@app/configuration';
 import { PublicModule } from './public/public.module';
+import { MailModule } from './mail/mail.module';
 import * as path from 'path';
 
 @Module({
@@ -46,6 +47,7 @@ import * as path from 'path';
     VillagesModule,
     FacilitiesModule,
     AuthModule,
+    MailModule,
     ResourceTypesModule,
     FacilityTypesResourceTypesModule,
     FacilityTypesModule,

@@ -45,4 +45,12 @@ export class User {
 
   @OneToMany(() => Attack, (attack) => attack.defender)
   attacksTo: Village[];
+
+  // Avoid returning unnecessary data, and protect password's hash
+  toJSON() {
+    return {
+      id: this.id,
+      username: this.username,
+    };
+  }
 }

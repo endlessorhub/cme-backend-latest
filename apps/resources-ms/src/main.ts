@@ -15,9 +15,7 @@ async function bootstrap() {
     },
   );
 
-  app.listen(() => {
-    console.log('===== Resources MS in use');
-  });
+  app.listen(() => null);
 }
 
 bootstrap();

@@ -35,7 +35,10 @@ roles
   .deleteOwn('village')
 
   .createOwn('attack')
-  .readOwn('attack', readOwnAttackProps);
+  .readOwn('attack', readOwnAttackProps)
+
+  .createOwn('facilities')
+  .deleteOwn('facilities');
 
 /* .grant(AppRoles.Admin) // switch to another role without breaking the chain
 .extend(AppRoles.User) // inherit role capabilities. also takes an array

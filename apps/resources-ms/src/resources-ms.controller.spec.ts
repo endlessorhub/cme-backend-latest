@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResourcesMsController } from './resources-ms.controller';
-import { ResourcesMsService } from './resources-ms.service';
+import { ResourcesMsService } from './services/resources-ms.service';
 
 describe('ResourcesMsController', () => {
   let resourcesMsController: ResourcesMsController;
@@ -11,7 +11,9 @@ describe('ResourcesMsController', () => {
       providers: [ResourcesMsService],
     }).compile();
 
-    resourcesMsController = app.get<ResourcesMsController>(ResourcesMsController);
+    resourcesMsController = app.get<ResourcesMsController>(
+      ResourcesMsController,
+    );
   });
 
   describe('root', () => {

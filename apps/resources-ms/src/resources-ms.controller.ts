@@ -1,33 +1,63 @@
-import { Controller } from '@nestjs/common';
+import { Controller, HttpException, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { CreateOrderDto } from 'apps/cme-backend/src/orders/dto/create-order.dto';
-import { CreateFacilityDto } from 'apps/cme-backend/src/facilities/dto/create-facility.dto';
 
-import { ResourcesMicroServiceMessages } from './service-messages';
-import { ResourcesMsService } from './resources-ms.service';
+import {
+  CreateFacilityMsReq,
+  FindFacilitiesForVillageMsReq,
+  FindFacilityMsReq,
+  RemoveFacilityMsReq,
+  ResourcesMicroServiceMessages,
+} from './service-messages';
+import { ResourcesMsFacilitiesService } from './services/resources-ms.service';
 
 @Controller()
 export class ResourcesMsController {
-  constructor(private readonly resourcesMsService: ResourcesMsService) {}
+  constructor(
+    private readonly resourcesMsFacilitiesService: ResourcesMsFacilitiesService,
+  ) {}
 
   /**
    * FACILITIES
    */
 
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.CREATE_FACILITY })
-  async createFacility(facility: CreateFacilityDto): Promise<any> {
-    return {};
+  async createFacility(data: CreateFacilityMsReq): Promise<any> {
+    return await this.resourcesMsFacilitiesService.create(data);
   }
 
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.FIND_FACILITY })
-  async findFacilityById(facilityId: number): Promise<any> {
-    return {};
+  async findFacilityById(data: FindFacilityMsReq): Promise<any> {
+    const res = await this.resourcesMsFacilitiesService.findOne(
+      data.facilityId,
+    );
+
+    if (!res) {
+      return new HttpException('Facility not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (res.village.user.id !== data.userId) {
+      return new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return res;
   }
 
+  // TODO: check if need to check what user does the request
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.GET_VILLAGE_FACILITIES })
-  async getFacilitiesForVillage(villageId: number): Promise<any> {
-    return {};
+  async getFacilitiesForVillage(
+    data: FindFacilitiesForVillageMsReq,
+  ): Promise<any> {
+    return await this.resourcesMsFacilitiesService.findAllForVillage(
+      data.villageId,
+    );
+  }
+
+  // TODO: check if need to check what user does the request
+  @MessagePattern({ cmd: ResourcesMicroServiceMessages.REMOVE_FACILITY })
+  async removeFacility(data: RemoveFacilityMsReq): Promise<any> {
+    return await this.resourcesMsFacilitiesService.remove(data.facilityId);
   }
 
   /**

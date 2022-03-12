@@ -25,6 +25,7 @@ export type unitCharacteristics = {
   production_time: number;
 };
 
+// replace this unitInfo + characteristics with the resources-ms one when migrating the battle manager to new ms
 export type unitInfo = {
   unitTypeId: number;
   unitTypeName: string;

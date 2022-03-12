@@ -2,6 +2,8 @@ import { Controller, HttpException, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
 import { CreateOrderDto } from 'apps/cme-backend/src/orders/dto/create-order.dto';
+import { ResourceInfo, ResourceUnitInfo } from './rules/mainResourcesTypes';
+import { mergeRulesToList } from './rules/militaryResourcesHelpers';
 
 import {
   CreateFacilityMsReq,
@@ -81,15 +83,16 @@ export class ResourcesMsController {
   /**
    * Merges a list of units with their actual characteristics (rules).
    *
-   * TODO: define types for these units
-   * TODO: Add a "Common Types" TS lib (try a nestJS lib to use it anywhere easily) to use the same types everywhere
+   * TODO: Migrate the main resources types (info) as a nestJS lib to use the same types everywhere (do while migrating the battle manager)
    *
    * @param unitsInfo
    * @returns
    */
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.MERGE_UNIT_RULES })
-  async mergeUnitsRules(unitsInfo: ReadonlyArray<any>): Promise<any> {
-    return {};
+  mergeUnitsRules(
+    unitsInfo: Array<ResourceInfo>,
+  ): Array<ResourceInfo | ResourceUnitInfo> {
+    return mergeRulesToList(unitsInfo);
   }
 
   // A simple method that returns the string given in parameter, to test the validity of this MS

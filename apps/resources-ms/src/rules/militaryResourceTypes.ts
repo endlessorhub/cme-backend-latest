@@ -33,9 +33,9 @@ export type MilitaryResourceUnitCharacteristics = Readonly<{
   range: number;
   damage: number;
   defense: number;
-  pierceDefense: number;
+  pierce_defense: number;
   speed: number;
-  foodUpkeep: number; // Todo: maybe delete if not needed in Front.
+  food_upkeep: number; // Todo: maybe delete if not needed in Front.
 }>;
 
 export type MilitaryResourceUnitProductionCosts = Readonly<{

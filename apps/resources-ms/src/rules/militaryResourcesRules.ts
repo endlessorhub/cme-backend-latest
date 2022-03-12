@@ -88,6 +88,15 @@ export const militaryCenterDescriptor: MilitaryBuildingUnit = {
   ],
 };
 
+export const relatedMilitaryBuildingDescriptors: Record<
+  MILITARY_BUILDINGS,
+  MilitaryBuildingUnit
+> = {
+  [MILITARY_BUILDINGS.BARRACK]: barrackDescriptor,
+  [MILITARY_BUILDINGS.SHOOTING_RANGE]: shootingRangeDescriptor,
+  [MILITARY_BUILDINGS.MILITARY_CENTER]: militaryCenterDescriptor,
+};
+
 /**
  * Barrack resources descriptors.
  */
@@ -99,9 +108,9 @@ export const clubmanDescriptor: MilitaryResourceUnit = {
     range: 1,
     damage: 8,
     defense: 4,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 10,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 1,
@@ -119,9 +128,9 @@ export const macemanDescriptor: MilitaryResourceUnit = {
     range: 1,
     damage: 12,
     defense: 5,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 10,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 10,
@@ -139,9 +148,9 @@ export const shortSwordDescriptor: MilitaryResourceUnit = {
     range: 1,
     damage: 14,
     defense: 5,
-    pierceDefense: 4,
+    pierce_defense: 4,
     speed: 10,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 15,
@@ -159,9 +168,9 @@ export const longSwordDescriptor: MilitaryResourceUnit = {
     range: 1,
     damage: 16,
     defense: 7,
-    pierceDefense: 6,
+    pierce_defense: 6,
     speed: 10,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 20,
@@ -183,9 +192,9 @@ export const rockThrowerDescriptor: MilitaryResourceUnit = {
     range: 3,
     damage: 6,
     defense: 2,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 12,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 2,
@@ -203,9 +212,9 @@ export const slingerDescriptor: MilitaryResourceUnit = {
     range: 4,
     damage: 8,
     defense: 2,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 12,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 4,
@@ -223,9 +232,9 @@ export const shortBowDescriptor: MilitaryResourceUnit = {
     range: 4,
     damage: 8,
     defense: 2,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 12,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 4,
@@ -247,9 +256,9 @@ export const spearmanDescriptor: MilitaryResourceUnit = {
     range: 1,
     damage: 15,
     defense: 6,
-    pierceDefense: 1,
+    pierce_defense: 1,
     speed: 10,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 18,
@@ -267,9 +276,9 @@ export const pikemanDescriptor: MilitaryResourceUnit = {
     range: 2,
     damage: 18,
     defense: 7,
-    pierceDefense: 2,
+    pierce_defense: 2,
     speed: 9,
-    foodUpkeep: 1,
+    food_upkeep: 1,
   },
   productionCosts: {
     iron: 15,
@@ -278,4 +287,19 @@ export const pikemanDescriptor: MilitaryResourceUnit = {
     mkc: 4,
   },
   productionTime: 16,
+};
+
+export const relatedUnitDescriptors: Record<
+  MILITARY_RESOURCES,
+  MilitaryResourceUnit
+> = {
+  [MILITARY_RESOURCES.CLUBMAN]: clubmanDescriptor,
+  [MILITARY_RESOURCES.MACEMAN]: macemanDescriptor,
+  [MILITARY_RESOURCES.SHORT_SWORD]: shortSwordDescriptor,
+  [MILITARY_RESOURCES.LONG_SWORD]: longSwordDescriptor,
+  [MILITARY_RESOURCES.ROCK_THROWER]: rockThrowerDescriptor,
+  [MILITARY_RESOURCES.SLINGER]: slingerDescriptor,
+  [MILITARY_RESOURCES.SHORT_BOW]: shortBowDescriptor,
+  [MILITARY_RESOURCES.SPEARMAN]: spearmanDescriptor,
+  [MILITARY_RESOURCES.PIKEMAN]: pikemanDescriptor,
 };

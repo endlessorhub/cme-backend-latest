@@ -23,6 +23,7 @@ deploy_to_preprod:
     - scp cme-backend/deploy.sh admin@$IP_DEV:/home/admin/deploy.sh
     - ssh admin@$IP_DEV 'sudo chown -R admin:admin /home/admin/cme-backend'
     - scp -r cme-backend/apps admin@$IP_DEV:/home/admin/cme-backend/
+    - scp cme-backend/package.json admin@$IP_DEV:/home/admin/cme-backend/
     - ssh admin@$IP_DEV 'sudo cp -R /home/admin/cme-backend/apps/ /home/gitlab-ci/cme-backend/'  
     - ssh admin@$IP_DEV 'sudo chown -R gitlab-ci:gitlab-ci /home/gitlab-ci/cme-backend'
 

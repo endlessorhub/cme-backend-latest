@@ -44,6 +44,7 @@
     "migrate": "yarn run typeorm migration:run"
   },
   "dependencies": {
+    "@nestjs/microservices" :  "^8.4.1",
     "@nestjs-modules/mailer": "^1.6.1",
     "@nestjs/common": "7.6.15",
     "@nestjs/config": "0.6.3",

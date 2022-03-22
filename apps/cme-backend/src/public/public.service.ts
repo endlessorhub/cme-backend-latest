@@ -22,10 +22,10 @@ export type VillageLeader = Readonly<{
 
 @Injectable()
 export class PublicService {
-  private queryRunner: QueryRunner;
   private resourcesMSClient: ClientProxy;
 
   constructor(private connection: Connection) {
+    console.log('====== CREATING A NEW CLIENT FOR THE PUBLIC SERVICE');
     this.resourcesMSClient = ClientProxyFactory.create({
       transport: Transport.TCP,
       options: {
@@ -38,12 +38,15 @@ export class PublicService {
   async getVillageLeaders(
     limit: number = DEFAULT_LIMIT_LEADERS,
   ): Promise<ReadonlyArray<VillageLeader>> {
-    this.queryRunner = this.connection.createQueryRunner();
-    await this.queryRunner.connect();
+    let rows = [];
+    const queryRunner = this.connection.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
 
     const limitChecked = limit <= MAX_LIMIT_LEADERS ? limit : MAX_LIMIT_LEADERS;
 
-    return await this.queryRunner.query(`
+    try {
+      rows = await queryRunner.query(`
         SELECT v.name, vr.total, RANK () OVER ( 
             ORDER BY vr.total DESC 
         ) rank  FROM villages v
@@ -51,9 +54,17 @@ export class PublicService {
             (SELECT village_id, SUM(count) as total FROM villages_resource_types GROUP BY village_id) vr
         ON v.id = vr.village_id
         LIMIT ${limitChecked}
-    `);
+      `);
 
-    return [];
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      console.error(err);
+    } finally {
+      await queryRunner.release();
+    }
+
+    return rows;
   }
 
   testResourcesMS(test: string) {

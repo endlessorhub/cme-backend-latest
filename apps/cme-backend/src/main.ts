@@ -8,6 +8,7 @@ import { TransformInterceptor } from './transform.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  //app.enableCors();
   app.useWebSocketAdapter(new RedisIoAdapter(app));
   const reflector = app.get(Reflector);
   app.useGlobalGuards(new CmeAuthGuard(reflector));

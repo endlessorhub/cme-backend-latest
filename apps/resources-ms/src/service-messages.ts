@@ -1,4 +1,6 @@
 import { CreateFacilityDto } from 'apps/cme-backend/src/facilities/dto/create-facility.dto';
+import { CreateOrderDto } from 'apps/cme-backend/src/orders/dto/create-order.dto';
+import { Village } from 'apps/cme-backend/src/villages/village.entity';
 
 export const ResourcesMicroServiceName = 'RESOURCES_MS';
 
@@ -9,7 +11,7 @@ export const ResourcesMicroServiceMessages = {
   GET_VILLAGE_FACILITIES: `${ResourcesMicroServiceName}_get_village_facilities`,
   REMOVE_FACILITY: `${ResourcesMicroServiceName}_remove_facility`,
   CREATE_ORDER: `${ResourcesMicroServiceName}_create_order`,
-  GET_VILLAGE_RESOURCES: `${ResourcesMicroServiceName}_get_village_resources`,
+  FORMAT_VILLAGE_RESOURCES: `${ResourcesMicroServiceName}_format_village_resources`,
   MERGE_UNIT_RULES: `${ResourcesMicroServiceName}_merge_unit_rules`,
 };
 
@@ -27,3 +29,7 @@ export type FindFacilitiesForVillageMsReq = Readonly<{
 export type RemoveFacilityMsReq = Readonly<{
   facilityId: number;
 }>;
+
+export type CreateOrderMsReq = CreateOrderDto;
+
+export type FormatVillageResourcesMsReq = Village;

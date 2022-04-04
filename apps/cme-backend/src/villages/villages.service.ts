@@ -8,7 +8,7 @@ import { VillageResourceType } from '../villages-resource-types/village-resource
 import { CreateVillageDto } from './dto/create-village.dto';
 import * as Promise from 'bluebird';
 
-const MAX_VILLAGES_PER_USER = 1;
+const MAX_VILLAGES_PER_USER = 3;
 
 @Injectable()
 export class VillagesService {
@@ -21,6 +21,10 @@ export class VillagesService {
 
   findAll(): Promise<Village[]> {
     return this.villagesRepository.find();
+  }
+
+  findAllForUserId(userId: string): Promise<Village[]> {
+    return this.villagesRepository.find({ where: { user: { id: userId } } });
   }
 
   findAllAround(x: number, y: number, offset: number): Promise<Village[]> {
@@ -79,7 +83,7 @@ export class VillagesService {
       throw new HttpException(
         `You already have ${nbVillages} village${
           nbVillages > 1 ? 's' : ''
-        }, villages creation per user is blocked to 1`,
+        }, villages creation per user is blocked to ${MAX_VILLAGES_PER_USER}`,
         HttpStatus.BAD_REQUEST,
       );
     }

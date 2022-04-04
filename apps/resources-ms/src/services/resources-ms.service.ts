@@ -1,81 +1,49 @@
-import { Injectable, Logger } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Connection, Repository } from 'typeorm';
-import { some } from 'lodash';
+import { Injectable } from '@nestjs/common';
+import { isEmpty } from 'lodash';
 
-import { Facility } from 'apps/cme-backend/src/facilities/facility.entity';
-import { CreateFacilityMsReq } from '../service-messages';
+import {
+  VillageResourcesSummary,
+  VillageResourcesSummaryResource,
+  VillageResourcesSummaryResourceFighter,
+} from 'apps/cme-backend/src/villages/types';
+import { Village } from 'apps/cme-backend/src/villages/village.entity';
+import { VillageResourceType } from 'apps/cme-backend/src/villages-resource-types/village-resource-type.entity';
 
 @Injectable()
-export class ResourcesMsFacilitiesService {
-  private logger: Logger = new Logger('AppController');
+export class ResourcesMsService {
+  // TODO: plug this to the /villages/:id/resources controller route when ready.
+  formatVillageResources(village: Village): VillageResourcesSummary {
+    const fighters: Array<VillageResourcesSummaryResourceFighter> = [];
+    const others: Array<VillageResourcesSummaryResource> = [];
 
-  constructor(
-    private connection: Connection,
-    @InjectRepository(Facility)
-    private facilitiesRepository: Repository<Facility>,
-  ) {}
+    village.villagesResourceTypes?.forEach((res: VillageResourceType) => {
+      const baseInfo: VillageResourcesSummaryResource = {
+        name: res.resourceType.type,
+        industryId: Number(res.resourceType.industry),
+        count: res.count,
+        id: res.resourceType.id,
+      };
 
-  findAllForVillage(villageId: number): Promise<Facility[]> {
-    return this.facilitiesRepository.find({
-      where: { village: { id: villageId } },
-    });
-  }
-
-  findOne(id: number): Promise<Facility> {
-    return this.facilitiesRepository.findOne({
-      where: { id },
-    });
-  }
-
-  async create(facility: CreateFacilityMsReq): Promise<Facility> {
-    let facilityEntity: Facility;
-
-    const queryRunner = this.connection.createQueryRunner();
-    await queryRunner.connect();
-    await queryRunner.startTransaction();
-    try {
-      const rows = await queryRunner.query(`
-        SELECT ftp.resource_type_id, ftp.amount, vrt.count
-        FROM facility_type_prices ftp
-        LEFT JOIN villages_resource_types vrt
-        ON ftp.resource_type_id = vrt.resource_type_id
-        WHERE ftp.facility_type_id = ${facility.facilityType}
-        AND vrt.village_id = ${facility.village}
-      `);
-
-      if (some(rows, (row) => row.count < row.amount)) {
-        throw new Error('Insufficient resources');
+      if (!isEmpty(res.resourceType.characteristics)) {
+        fighters.push({
+          ...baseInfo,
+          health: res.resourceType.characteristics['health'],
+          range: res.resourceType.characteristics['range'],
+          damage: res.resourceType.characteristics['damage'],
+          defense: res.resourceType.characteristics['defense'],
+          pierce_defense: res.resourceType.characteristics['pierce_defense'],
+          speed: res.resourceType.characteristics['speed'],
+          food_upkeep: res.resourceType.characteristics['food_upkeep'],
+          production_time: res.resourceType.characteristics['production_time'],
+        });
+      } else {
+        others.push(baseInfo);
       }
+    });
 
-      await queryRunner.query(`
-        UPDATE villages_resource_types AS vrt
-        SET
-          count = count - ftp.amount,
-          updated_at = NOW()
-        FROM facility_type_prices AS ftp
-        WHERE ftp.facility_type_id = ${facility.facilityType}
-        AND ftp.resource_type_id = vrt.resource_type_id
-        AND vrt.village_id = ${facility.village}
-      `);
-
-      facilityEntity = await queryRunner.manager
-        .getRepository(Facility)
-        .save(facility);
-      await queryRunner.commitTransaction();
-    } catch (err) {
-      await queryRunner.rollbackTransaction();
-      throw err;
-      // TODO: find the best way to handle this error while in MS
-      // throw new HttpException('Insufficient resources', HttpStatus.CONFLICT);
-    } finally {
-      await queryRunner.release();
-    }
-
-    return this.facilitiesRepository.findOne(facilityEntity.id);
-  }
-
-  async remove(id: number): Promise<void> {
-    await this.facilitiesRepository.delete(id);
+    return {
+      fighters,
+      others,
+    };
   }
 }

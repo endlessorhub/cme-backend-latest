@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ResourcesMsController } from './resources-ms.controller';
-import { ResourcesMsService } from './services/resources-ms.service';
+import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities.service';
 
 describe('ResourcesMsController', () => {
   let resourcesMsController: ResourcesMsController;
@@ -8,7 +8,7 @@ describe('ResourcesMsController', () => {
   beforeEach(async () => {
     const app: TestingModule = await Test.createTestingModule({
       controllers: [ResourcesMsController],
-      providers: [ResourcesMsService],
+      providers: [ResourcesMsFacilitiesService],
     }).compile();
 
     resourcesMsController = app.get<ResourcesMsController>(

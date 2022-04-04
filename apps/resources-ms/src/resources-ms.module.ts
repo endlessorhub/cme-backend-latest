@@ -14,8 +14,10 @@ import { VillageResourceType } from 'apps/cme-backend/src/villages-resource-type
 import { EventsModule } from 'apps/cme-backend/src/events/events.module';
 
 import { ResourcesMsController } from './resources-ms.controller';
-import { ResourcesMsFacilitiesService } from './services/resources-ms.service';
+import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities.service';
 import { ResourcesUpdaterCronService } from './services/resources-updater-cron.service';
+import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
+import { ResourcesMsService } from './services/resources-ms.service';
 
 @Module({
   imports: [
@@ -42,7 +44,12 @@ import { ResourcesUpdaterCronService } from './services/resources-updater-cron.s
     TypeOrmModule.forFeature([VillageResourceType]),
   ],
   controllers: [ResourcesMsController],
-  providers: [ResourcesMsFacilitiesService, ResourcesUpdaterCronService],
+  providers: [
+    ResourcesMsFacilitiesService,
+    ResourcesUpdaterCronService,
+    ResourcesMsOrdersService,
+    ResourcesMsService,
+  ],
 })
 export class ResourcesMsModule {
   constructor(private _connection: Connection) {}

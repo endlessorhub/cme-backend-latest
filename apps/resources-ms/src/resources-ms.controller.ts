@@ -1,23 +1,27 @@
 import { Controller, HttpException, HttpStatus } from '@nestjs/common';
 import { MessagePattern } from '@nestjs/microservices';
 
-import { CreateOrderDto } from 'apps/cme-backend/src/orders/dto/create-order.dto';
-import { ResourceInfo, ResourceUnitInfo } from './rules/mainResourcesTypes';
-import { mergeRulesToList } from './rules/militaryResourcesHelpers';
+import { ResourceInfo, ResourceUnitInfo, mergeRulesToList } from './rules';
 
 import {
   CreateFacilityMsReq,
+  CreateOrderMsReq,
   FindFacilitiesForVillageMsReq,
   FindFacilityMsReq,
+  FormatVillageResourcesMsReq,
   RemoveFacilityMsReq,
   ResourcesMicroServiceMessages,
 } from './service-messages';
-import { ResourcesMsFacilitiesService } from './services/resources-ms.service';
+import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
+import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities.service';
+import { ResourcesMsService } from './services/resources-ms.service';
 
 @Controller()
 export class ResourcesMsController {
   constructor(
     private readonly resourcesMsFacilitiesService: ResourcesMsFacilitiesService,
+    private readonly resourcesMsOrdersService: ResourcesMsOrdersService,
+    private readonly resourcesMsService: ResourcesMsService,
   ) {}
 
   /**
@@ -67,23 +71,28 @@ export class ResourcesMsController {
    */
 
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.CREATE_ORDER })
-  async createOrder(order: CreateOrderDto): Promise<any> {
-    return {};
+  async createOrder(order: CreateOrderMsReq): Promise<any> {
+    return await this.resourcesMsOrdersService.create(order);
   }
 
   /**
    * RESOURCES
    */
 
-  @MessagePattern({ cmd: ResourcesMicroServiceMessages.GET_VILLAGE_RESOURCES })
-  async getResourcesForVillage(villageId: number): Promise<any> {
-    return {};
+  @MessagePattern({
+    cmd: ResourcesMicroServiceMessages.FORMAT_VILLAGE_RESOURCES,
+  })
+  async formatResourcesForVillage(
+    village: FormatVillageResourcesMsReq,
+  ): Promise<any> {
+    return this.resourcesMsService.formatVillageResources(village);
   }
 
   /**
    * Merges a list of units with their actual characteristics (rules).
    *
    * TODO: Migrate the main resources types (info) as a nestJS lib to use the same types everywhere (do while migrating the battle manager)
+   * TODO: check if Promise needed as return type or not.
    *
    * @param unitsInfo
    * @returns
@@ -95,6 +104,7 @@ export class ResourcesMsController {
     return mergeRulesToList(unitsInfo);
   }
 
+  // TODO: remove when merging
   // A simple method that returns the string given in parameter, to test the validity of this MS
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.TEST_SERVICE })
   async testMicroServiceCall(data: string): Promise<string> {

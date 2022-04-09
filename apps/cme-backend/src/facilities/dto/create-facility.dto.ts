@@ -5,19 +5,19 @@ import { FacilityType } from '../../facility-types/facility-type.entity';
 import { Exclude } from 'class-transformer';
 
 export class CreateFacilityDto {
-    @IsEmpty()
-    id: number;
+  @IsEmpty()
+  id?: number;
 
-    @Exclude()
-    readonly level: number = 1;
+  @Exclude()
+  readonly level: number = 1;
 
-    @ApiProperty()
-    @IsNumber()
-    facilityType: FacilityType;
-    @ApiProperty()
-    @IsNumber()
-    location: number;
-    @ApiProperty()
-    @IsNumber()
-    village: Village;
+  @ApiProperty()
+  @IsNumber()
+  facilityType: Partial<FacilityType>;
+  @ApiProperty()
+  @IsNumber()
+  location: number;
+  @ApiProperty()
+  @IsNumber()
+  village: Partial<Village>;
 }

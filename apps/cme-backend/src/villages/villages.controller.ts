@@ -59,6 +59,12 @@ export class VillagesController {
     }
   }
 
+  // Should stay declared before the /:id to avoid the router thinking "own" is an id.
+  @Get('own')
+  async myVillages(@Request() req) {
+    return await this.villagesService.findAllForUserId(req.user.id);
+  }
+
   @Get(':id')
   async show(@Request() req, @Param('id') id: string) {
     const village = await this.villagesService.findOne(id);

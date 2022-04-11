@@ -6,14 +6,18 @@ import { Village } from './village.entity';
 import { User } from '../users/user.entity';
 import { AccessControlModule } from 'nest-access-control';
 import { roles } from '../app.roles';
+import { Facility } from '../facilities/facility.entity';
+import { FacilityType } from '../facility-types/facility-type.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Village]),
     TypeOrmModule.forFeature([User]),
-    AccessControlModule.forRoles(roles)
+    TypeOrmModule.forFeature([Facility]),
+    TypeOrmModule.forFeature([FacilityType]),
+    AccessControlModule.forRoles(roles),
   ],
   controllers: [VillagesController],
-  providers: [VillagesService]
+  providers: [VillagesService],
 })
 export class VillagesModule {}

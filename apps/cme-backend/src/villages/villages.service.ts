@@ -7,8 +7,14 @@ import { ResourceType } from '../resource-types/resource-type.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
 import { CreateVillageDto } from './dto/create-village.dto';
 import * as Promise from 'bluebird';
+import { FacilityType } from '../facility-types/facility-type.entity';
+import { Facility } from '../facilities/facility.entity';
+import { CreateFacilityDto } from '../facilities/dto/create-facility.dto';
 
 const MAX_VILLAGES_PER_USER = 3;
+
+// TODO: add this in the resources-ms if needed
+const BASE_FACILITIES = ['cropland', 'iron_mine', 'sawmill'];
 
 @Injectable()
 export class VillagesService {
@@ -17,6 +23,8 @@ export class VillagesService {
     private villagesRepository: Repository<Village>,
     @InjectRepository(User)
     private usersRepository: Repository<User>,
+    @InjectRepository(FacilityType)
+    private facilityTypesRepository: Repository<FacilityType>,
   ) {}
 
   findAll(): Promise<Village[]> {
@@ -71,11 +79,49 @@ export class VillagesService {
     });
   }
 
+  async createFirstFacilitiesForVillage(
+    villageId: number,
+  ): Promise<Facility[]> {
+    const facilities = await this.facilityTypesRepository.find();
+    const mainFacilities = facilities.filter((facility) =>
+      BASE_FACILITIES.includes(facility.type),
+    );
+
+    const queryRunner = getConnection().createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    const finalFacilities = [];
+
+    try {
+      mainFacilities.forEach(async (facilityType, index) => {
+        const facility: any = {
+          location: index,
+          village: villageId,
+          facilityType: facilityType.id,
+          level: 1,
+        };
+
+        finalFacilities.push(
+          await queryRunner.manager.getRepository(Facility).save(facility),
+        );
+      });
+      await queryRunner.commitTransaction();
+    } catch (err) {
+      await queryRunner.rollbackTransaction();
+      throw err;
+    } finally {
+      await queryRunner.release();
+    }
+
+    return finalFacilities;
+  }
+
   async create(villageDto: CreateVillageDto, userId: number): Promise<Village> {
     const user = await this.usersRepository.findOneOrFail(userId);
     const villagesForThisUser = await this.villagesRepository.find({
       where: { user: { id: userId } },
     });
+    let facilities = [];
 
     const nbVillages = villagesForThisUser.length;
 
@@ -129,7 +175,9 @@ export class VillagesService {
       });
     });
 
-    return village;
+    facilities = await this.createFirstFacilitiesForVillage(village.id);
+
+    return { ...village, facilities };
   }
 
   async remove(id: string): Promise<void> {

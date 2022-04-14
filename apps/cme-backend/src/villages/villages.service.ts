@@ -1,20 +1,22 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Between, getConnection, getManager, Repository } from 'typeorm';
+import * as Promise from 'bluebird';
+import { minBy, max } from 'lodash';
+
 import { Village } from './village.entity';
 import { User } from '../users/user.entity';
 import { ResourceType } from '../resource-types/resource-type.entity';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
 import { CreateVillageDto } from './dto/create-village.dto';
-import * as Promise from 'bluebird';
 import { FacilityType } from '../facility-types/facility-type.entity';
 import { Facility } from '../facilities/facility.entity';
-import { CreateFacilityDto } from '../facilities/dto/create-facility.dto';
 
-const MAX_VILLAGES_PER_USER = 3;
+const MAX_VILLAGES_PER_USER = 5;
 
 // TODO: add this in the resources-ms if needed
 const BASE_FACILITIES = ['cropland', 'iron_mine', 'sawmill'];
+const RESOURCES_NEEDED_NEW_VILLAGE = 35000;
 
 @Injectable()
 export class VillagesService {
@@ -25,6 +27,8 @@ export class VillagesService {
     private usersRepository: Repository<User>,
     @InjectRepository(FacilityType)
     private facilityTypesRepository: Repository<FacilityType>,
+    @InjectRepository(VillageResourceType)
+    private villagesResourceTypesRepository: Repository<VillageResourceType>,
   ) {}
 
   findAll(): Promise<Village[]> {
@@ -116,6 +120,84 @@ export class VillagesService {
     return finalFacilities;
   }
 
+  checkIfHasEnoughResourcesForNewVillage(villages: Village[]): boolean {
+    let totalWood = 0;
+    let totalIron = 0;
+    let totalFood = 0;
+
+    villages.forEach((village) => {
+      const resources = village.villagesResourceTypes.filter((res) =>
+        ['food', 'iron', 'wood'].includes(res.resourceType.type),
+      );
+
+      resources.forEach((res) => {
+        switch (res.resourceType.type) {
+          case 'food':
+            totalFood += res.count;
+            break;
+          case 'iron':
+            totalIron += res.count;
+            break;
+
+          case 'wood':
+            totalWood += res.count;
+            break;
+
+          default:
+            break;
+        }
+      });
+    });
+
+    return (
+      totalWood >= RESOURCES_NEEDED_NEW_VILLAGE &&
+      totalIron >= RESOURCES_NEEDED_NEW_VILLAGE &&
+      totalFood >= RESOURCES_NEEDED_NEW_VILLAGE
+    );
+  }
+
+  removeResourcesForVillageCreation(villages: Village[]) {
+    const leftToRemove = {
+      food: RESOURCES_NEEDED_NEW_VILLAGE,
+      iron: RESOURCES_NEEDED_NEW_VILLAGE,
+      wood: RESOURCES_NEEDED_NEW_VILLAGE,
+    };
+
+    villages.forEach((village: Village) => {
+      const resources = village.villagesResourceTypes.filter((res) =>
+        ['food', 'iron', 'wood'].includes(res.resourceType.type),
+      );
+      const removeFromThisVillage = {
+        food: 0,
+        iron: 0,
+        wood: 0,
+      };
+      const villageResourceTypesAfter: VillageResourceType[] = [];
+
+      resources.forEach((res: VillageResourceType) => {
+        const type = res.resourceType.type;
+
+        if (leftToRemove[type] > 0 && res.count > 0) {
+          const shouldRemove = minBy([res.count, leftToRemove[type]]);
+
+          removeFromThisVillage[type] = shouldRemove;
+          leftToRemove[type] -= shouldRemove;
+
+          villageResourceTypesAfter.push({
+            ...res,
+            count: max([res.count - shouldRemove, 0]),
+          });
+        }
+      });
+
+      this.villagesResourceTypesRepository
+        .save(villageResourceTypesAfter)
+        .catch((e) => {
+          console.error(e);
+        });
+    });
+  }
+
   async create(villageDto: CreateVillageDto, userId: number): Promise<Village> {
     const user = await this.usersRepository.findOneOrFail(userId);
     const villagesForThisUser = await this.villagesRepository.find({
@@ -125,11 +207,22 @@ export class VillagesService {
 
     const nbVillages = villagesForThisUser.length;
 
-    if (nbVillages > MAX_VILLAGES_PER_USER - 1) {
+    if (nbVillages >= MAX_VILLAGES_PER_USER) {
       throw new HttpException(
         `You already have ${nbVillages} village${
           nbVillages > 1 ? 's' : ''
         }, villages creation per user is blocked to ${MAX_VILLAGES_PER_USER}`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const hasEnoughResources = this.checkIfHasEnoughResourcesForNewVillage(
+      villagesForThisUser,
+    );
+
+    if (nbVillages > 0 && !hasEnoughResources) {
+      throw new HttpException(
+        `You need a total of ${RESOURCES_NEEDED_NEW_VILLAGE} of food, ${RESOURCES_NEEDED_NEW_VILLAGE} of iron and ${RESOURCES_NEEDED_NEW_VILLAGE} of iron shared between all of your villages to create a new one.`,
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -157,9 +250,6 @@ export class VillagesService {
         );
       }
 
-      // Maybe a way to save the Entity from DTO directly through Entity Manager without using Repository ?
-      // https://github.com/nestjs/nest/issues/918
-      // https://github.com/scalio/nest-workshop-backend/blob/master/src/common/interceptors/transform.interceptor.ts
       village = await transactionalEntityManager
         .getRepository(Village)
         .save(village);
@@ -174,6 +264,10 @@ export class VillagesService {
         return transactionalEntityManager.save(villageResourceType);
       });
     });
+
+    if (nbVillages > 1 && hasEnoughResources) {
+      this.removeResourcesForVillageCreation(villagesForThisUser);
+    }
 
     facilities = await this.createFirstFacilitiesForVillage(village.id);
 

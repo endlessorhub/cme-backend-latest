@@ -85,6 +85,9 @@
     "swagger-ui-express": "4.1.6",
     "typeorm": "0.2.32"
   },
+  "resolutions": {
+    "@types/superagent": "4.1.13"
+  },
   "devDependencies": {
     "@nestjs/cli": "7.6.0",
     "@nestjs/schematics": "7.3.1",

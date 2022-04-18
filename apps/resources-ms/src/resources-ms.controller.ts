@@ -103,12 +103,4 @@ export class ResourcesMsController {
   ): Array<ResourceInfo | ResourceUnitInfo> {
     return mergeRulesToList(unitsInfo);
   }
-
-  // TODO: remove when merging
-  // A simple method that returns the string given in parameter, to test the validity of this MS
-  @MessagePattern({ cmd: ResourcesMicroServiceMessages.TEST_SERVICE })
-  async testMicroServiceCall(data: string): Promise<string> {
-    console.log('===== received request');
-    return `the data sent by the ms: ${data}`;
-  }
 }

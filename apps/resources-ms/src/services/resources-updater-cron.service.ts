@@ -19,8 +19,7 @@ export class ResourcesUpdaterCronService {
 
   // Launched every minute.
   // See https://docs.nestjs.com/techniques/task-scheduling for more info.
-  // Disabled for the moment to avoid double loads in prod.
-  // @Cron(CronExpression.EVERY_MINUTE)
+  @Cron(CronExpression.EVERY_MINUTE)
   async produceResources() {
     const queryRunner = this.connection.createQueryRunner();
     await queryRunner.connect();

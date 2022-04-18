@@ -1,15 +1,5 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { Connection, QueryRunner } from 'typeorm';
-
-import {
-  ResourcesMicroServiceName,
-  ResourcesMicroServiceMessages,
-} from 'apps/resources-ms/src/service-messages';
-import {
-  ClientProxyFactory,
-  Transport,
-  ClientProxy,
-} from '@nestjs/microservices';
+import { Injectable } from '@nestjs/common';
+import { Connection } from 'typeorm';
 
 const MAX_LIMIT_LEADERS = 50;
 const DEFAULT_LIMIT_LEADERS = 10;
@@ -22,18 +12,7 @@ export type VillageLeader = Readonly<{
 
 @Injectable()
 export class PublicService {
-  private resourcesMSClient: ClientProxy;
-
-  constructor(private connection: Connection) {
-    console.log('====== CREATING A NEW CLIENT FOR THE PUBLIC SERVICE');
-    this.resourcesMSClient = ClientProxyFactory.create({
-      transport: Transport.TCP,
-      options: {
-        host: 'resources-ms',
-        port: 3004,
-      },
-    });
-  }
+  constructor(private connection: Connection) {}
 
   async getVillageLeaders(
     limit: number = DEFAULT_LIMIT_LEADERS,
@@ -65,11 +44,5 @@ export class PublicService {
     }
 
     return rows;
-  }
-
-  testResourcesMS(test: string) {
-    const pattern = { cmd: ResourcesMicroServiceMessages.TEST_SERVICE };
-
-    return this.resourcesMSClient.send<string>(pattern, test);
   }
 }

@@ -18,6 +18,7 @@ import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities
 import { ResourcesUpdaterCronService } from './services/resources-updater-cron.service';
 import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
 import { ResourcesMsService } from './services/resources-ms.service';
+import { Order } from 'apps/cme-backend/src/orders/orders.entity';
 
 @Module({
   imports: [
@@ -42,6 +43,7 @@ import { ResourcesMsService } from './services/resources-ms.service';
     TypeOrmModule.forFeature([Facility]),
     TypeOrmModule.forFeature([FacilityTypePrice]),
     TypeOrmModule.forFeature([VillageResourceType]),
+    TypeOrmModule.forFeature([Order]),
   ],
   controllers: [ResourcesMsController],
   providers: [

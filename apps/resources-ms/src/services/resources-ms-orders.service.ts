@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
 import { isEmpty, some, uniq } from 'lodash';
@@ -18,7 +18,7 @@ export class ResourcesMsOrdersService {
     private redisService: RedisService,
   ) {}
 
-  async create(order: CreateOrderMsReq): Promise<Order> {
+  async create(order: CreateOrderMsReq): Promise<Order | HttpException> {
     let orderEntity;
 
     const queryRunner = this.connection.createQueryRunner();
@@ -59,7 +59,7 @@ export class ResourcesMsOrdersService {
         AND f.level = ftrt.level
         AND vrt.resource_type_id = rtp.source_resource_type_id
       `),
-      ); // Or rt.characteristics with DISTINCT clause , joining rt ON rtp.source_resource_type = rt.id to avoid handling deduplication in the code
+      );
 
       if (
         some(rows, (row) => row.count < row.amount * order.orderedQuantity) ||
@@ -119,8 +119,7 @@ export class ResourcesMsOrdersService {
         });
     } catch (err) {
       await queryRunner.rollbackTransaction();
-      throw err;
-      // throw new HttpException('Insufficient resources', HttpStatus.CONFLICT);
+      return new HttpException(err, HttpStatus.BAD_REQUEST);
     } finally {
       await queryRunner.release();
     }

@@ -30,35 +30,37 @@ export class UnitsProducerService {
   // or at least use BRPOPLPUSH to limit number of redis calls and ensure some reliability
   async produce() {
     // TO DO: fetch from DB
-    await Promise.mapSeries([
-      'clubman',
-      'maceman',
-      'short_sword',
-      'long_word',
-      'rock_thrower',
-      'slinger',
-      'shortbow',
-      'spearman',
-      'pikeman'
-    ],async (resourceType: string) => {
-      const listName = `pending:${resourceType}`;
-      const item = await this.redisClient.lpop(listName);
-      if (!item) return;
+    await Promise.mapSeries(
+      [
+        'clubman',
+        'maceman',
+        'short_sword',
+        'long_sword',
+        'rock_thrower',
+        'slinger',
+        'shortbow',
+        'spearman',
+        'pikeman',
+      ],
+      async (resourceType: string) => {
+        const listName = `pending:${resourceType}`;
+        const item = await this.redisClient.lpop(listName);
+        if (!item) return;
 
-      const parsed = JSON.parse(item);
-      const {
-        orderId,
-        resourceTypeId,
-        orderedQuantity,
-        productionTime,
-        villageId,
-        queue,
-        action,
-      } = parsed;
+        const parsed = JSON.parse(item);
+        const {
+          orderId,
+          resourceTypeId,
+          orderedQuantity,
+          productionTime,
+          villageId,
+          queue,
+          action,
+        } = parsed;
 
-      const productionTimeAsMilliseconds = productionTime * 1000;
+        const productionTimeAsMilliseconds = productionTime * 1000;
 
-      const rows = await this.queryRunner.query(`
+        const rows = await this.queryRunner.query(`
         SELECT
           orders.id,
           orders.delivered_quantity,
@@ -73,20 +75,25 @@ export class UnitsProducerService {
           vrt.village_id = ${villageId}
       `);
 
-      let deliveredQuantity;
-      let villageResourceTypeCount;
+        let deliveredQuantity;
+        let villageResourceTypeCount;
 
-      if (rows.length === 1) {
-        deliveredQuantity = rows[0].delivered_quantity;
-        villageResourceTypeCount = rows[0].count;
-      } else if (rows.length > 1) {
-        throw new Error('More than 1 row matching orders and villages_resource_types');
-      }
+        if (rows.length === 1) {
+          deliveredQuantity = rows[0].delivered_quantity;
+          villageResourceTypeCount = rows[0].count;
+        } else if (rows.length > 1) {
+          throw new Error(
+            'More than 1 row matching orders and villages_resource_types',
+          );
+        }
 
-      if ((rows.length === 0 || deliveredQuantity < orderedQuantity) && action === 'create') {
-        await this.queryRunner.startTransaction();
-        try {
-          let query = `
+        if (
+          (rows.length === 0 || deliveredQuantity < orderedQuantity) &&
+          action === 'create'
+        ) {
+          await this.queryRunner.startTransaction();
+          try {
+            let query = `
             UPDATE orders
             SET
               delivered_quantity = delivered_quantity + 1,
@@ -94,14 +101,14 @@ export class UnitsProducerService {
             WHERE
               id = ${orderId};
           `;
-          if (villageResourceTypeCount == null) {
-            query = `
+            if (villageResourceTypeCount == null) {
+              query = `
               ${query}
               INSERT INTO villages_resource_types (village_id, resource_type_id, count)
               VALUES (${villageId}, ${resourceTypeId}, 1)
             `;
-          } else {
-            query = `
+            } else {
+              query = `
               ${query}
               UPDATE villages_resource_types
               SET
@@ -111,32 +118,35 @@ export class UnitsProducerService {
                 village_id = ${villageId} AND
                 resource_type_id = ${resourceTypeId}
             `;
-          }
-          await this.queryRunner.query(query);
-          await this.queryRunner.commitTransaction();
+            }
+            await this.queryRunner.query(query);
+            await this.queryRunner.commitTransaction();
 
-          if (rows.length === 0 || deliveredQuantity + 1 < orderedQuantity) {
-            await this.redisClient.zadd(
-              `delayed:${resourceType}`,
-              Date.now() + productionTimeAsMilliseconds,
-              JSON.stringify({
-                orderId,
-                resourceTypeId,
-                orderedQuantity,
-                productionTime,
-                villageId,
-                queue,
-                action: 'create'
-              }),
-            ).catch(e => {
-              console.error(e);
-            });
+            if (rows.length === 0 || deliveredQuantity + 1 < orderedQuantity) {
+              await this.redisClient
+                .zadd(
+                  `delayed:${resourceType}`,
+                  Date.now() + productionTimeAsMilliseconds,
+                  JSON.stringify({
+                    orderId,
+                    resourceTypeId,
+                    orderedQuantity,
+                    productionTime,
+                    villageId,
+                    queue,
+                    action: 'create',
+                  }),
+                )
+                .catch((e) => {
+                  console.error(e);
+                });
+            }
+          } catch (err) {
+            await this.queryRunner.rollbackTransaction();
+            console.error(err);
           }
-        } catch (err) {
-          await this.queryRunner.rollbackTransaction();
-          console.error(err);
         }
-      }
-    });
+      },
+    );
   }
 }

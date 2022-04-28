@@ -6,7 +6,6 @@ import { RedlockService } from '@app/redlock';
 
 @Injectable()
 export class AppService {
-
   constructor(
     private schedulerService: SchedulerService,
     private redlockService: RedlockService,
@@ -23,7 +22,7 @@ export class AppService {
       'clubman',
       'maceman',
       'short_sword',
-      'long_word',
+      'long_sword',
       'rock_thrower',
       'slinger',
       'shortbow',
@@ -31,16 +30,13 @@ export class AppService {
       'pikeman',
     ];
 
-    const eventsType = [
-      'normal',
-      'return',
-    ];
+    const eventsType = ['normal', 'return'];
 
-    await Promise.map([ ...resourceTypes, ...eventsType ], (type: string) => {
+    await Promise.map([...resourceTypes, ...eventsType], (type: string) => {
       const zsetName = `delayed:${type}`;
       const listName = `pending:${type}`;
       const lockName = `triggered-resource-producer:schedule:${zsetName}`;
-      return this.redlockService.attempt(lockName, 10000, async() => {
+      return this.redlockService.attempt(lockName, 10000, async () => {
         await this.schedulerService.moveFromZsetToList({
           delayedTasksZsetKey: zsetName,
           start: 0,

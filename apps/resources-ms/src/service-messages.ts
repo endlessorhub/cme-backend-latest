@@ -7,6 +7,7 @@ export const ResourcesMicroServiceName = 'RESOURCES_MS';
 export const ResourcesMicroServiceMessages = {
   TEST_SERVICE: `${ResourcesMicroServiceName}test_service`,
   CREATE_FACILITY: `${ResourcesMicroServiceName}_create_facility`,
+  UPGRADE_FACILITY: `${ResourcesMicroServiceName}_upgrade_facility`,
   FIND_FACILITY: `${ResourcesMicroServiceName}_find_facility`,
   GET_VILLAGE_FACILITIES: `${ResourcesMicroServiceName}_get_village_facilities`,
   REMOVE_FACILITY: `${ResourcesMicroServiceName}_remove_facility`,
@@ -16,6 +17,11 @@ export const ResourcesMicroServiceMessages = {
 };
 
 export type FindFacilityMsReq = Readonly<{
+  facilityId: number;
+  userId: number;
+}>;
+
+export type UpgradeFacilityMsReq = Readonly<{
   facilityId: number;
   userId: number;
 }>;

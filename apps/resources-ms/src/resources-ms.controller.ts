@@ -11,6 +11,7 @@ import {
   FormatVillageResourcesMsReq,
   RemoveFacilityMsReq,
   ResourcesMicroServiceMessages,
+  UpgradeFacilityMsReq,
 } from './service-messages';
 import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
 import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities.service';
@@ -31,6 +32,23 @@ export class ResourcesMsController {
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.CREATE_FACILITY })
   async createFacility(data: CreateFacilityMsReq): Promise<any> {
     return await this.resourcesMsFacilitiesService.create(data);
+  }
+
+  @MessagePattern({ cmd: ResourcesMicroServiceMessages.UPGRADE_FACILITY })
+  async upgradeFacility(data: UpgradeFacilityMsReq): Promise<any> {
+    const res = await this.resourcesMsFacilitiesService.findOne(
+      data.facilityId,
+    );
+
+    if (!res) {
+      return new HttpException('Facility not found', HttpStatus.NOT_FOUND);
+    }
+
+    if (res.village.user.id !== data.userId) {
+      return new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
+    }
+
+    return await this.resourcesMsFacilitiesService.upgradeFacility(res);
   }
 
   @MessagePattern({ cmd: ResourcesMicroServiceMessages.FIND_FACILITY })

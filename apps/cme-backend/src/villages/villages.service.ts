@@ -18,9 +18,6 @@ const MAX_VILLAGES_PER_USER = 5;
 const BASE_FACILITIES = ['cropland', 'iron_mine', 'sawmill'];
 const RESOURCES_NEEDED_NEW_VILLAGE = 35000;
 
-// TODO: add this in the resources-ms if needed
-const BASE_FACILITIES = ['cropland', 'iron_mine', 'sawmill'];
-
 @Injectable()
 export class VillagesService {
   constructor(

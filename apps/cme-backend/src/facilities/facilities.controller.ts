@@ -8,6 +8,7 @@ import {
   ValidationPipe,
   Request,
   Delete,
+  Put,
 } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Connection, Repository } from 'typeorm';
@@ -24,6 +25,7 @@ import {
   CreateFacilityMsReq,
   FindFacilitiesForVillageMsReq,
   RemoveFacilityMsReq,
+  UpgradeFacilityMsReq,
 } from 'apps/resources-ms/src/service-messages';
 
 import { CreateFacilityDto } from './dto/create-facility.dto';
@@ -97,6 +99,22 @@ export class FacilitiesController {
     return this.resourcesMSClient.send<any, CreateFacilityMsReq>(
       pattern,
       facility,
+    );
+  }
+
+  @Put(':id/upgrade')
+  upgrade(@Request() req, @Param('id') id: string) {
+    const pattern = {
+      cmd: ResourcesMicroServiceMessages.UPGRADE_FACILITY,
+    };
+    const request: UpgradeFacilityMsReq = {
+      facilityId: Number(id),
+      userId: req.user.id,
+    };
+
+    return this.resourcesMSClient.send<any, UpgradeFacilityMsReq>(
+      pattern,
+      request,
     );
   }
 

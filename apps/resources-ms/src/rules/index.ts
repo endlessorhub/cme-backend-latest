@@ -6,4 +6,4 @@ export * from './militaryResourcesHelpers';
 
 export * from './resourceTypes';
 export * from './resourcesRules';
-// export * from './resourcesHelpers';
+export * from './resourcesHelpers';

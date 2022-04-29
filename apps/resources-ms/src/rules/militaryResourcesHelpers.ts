@@ -1,9 +1,13 @@
 import {
   MilitaryResourceUnitCharacteristics,
+  MILITARY_BUILDINGS,
   MILITARY_RESOURCES,
 } from './militaryResourceTypes';
 import { ResourceInfo, ResourceUnitInfo } from './mainResourcesTypes';
-import { relatedUnitDescriptors } from './militaryResourcesRules';
+import {
+  relatedMilitaryBuildingDescriptors,
+  relatedUnitDescriptors,
+} from './militaryResourcesRules';
 import { militaryResourceList } from '.';
 
 // Todo: add helper functions when needed, using the rules and types described.
@@ -41,4 +45,11 @@ export const mergeRulesToList = (
   resources: Array<ResourceInfo>,
 ): Array<ResourceInfo | ResourceUnitInfo> => {
   return resources.map((res) => addCharacteristicToResource(res));
+};
+
+export const checkIfFacilityNextLevel = (
+  type: MILITARY_BUILDINGS,
+  actualTier: number,
+) => {
+  return relatedMilitaryBuildingDescriptors[type].maxTier > actualTier;
 };

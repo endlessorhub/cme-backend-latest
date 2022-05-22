@@ -13,6 +13,7 @@ import { FacilityType } from '../facility-types/facility-type.entity';
 import { Facility } from '../facilities/facility.entity';
 
 const MAX_VILLAGES_PER_USER = 5;
+const MAX_DISTANCE_VILLAGE_CREATION = 10;
 
 // TODO: add this in the resources-ms if needed
 const BASE_FACILITIES = ['cropland', 'iron_mine', 'sawmill'];
@@ -198,11 +199,40 @@ export class VillagesService {
     });
   }
 
+  checkClosestVillageDistance(village_x : number , village_y : number): Promise<Village> {
+    
+    const closestVillages = this.villagesRepository.find({
+      where: [
+        {
+          x: Between(village_x - MAX_DISTANCE_VILLAGE_CREATION, village_x + MAX_DISTANCE_VILLAGE_CREATION),
+          y: Between(village_y - MAX_DISTANCE_VILLAGE_CREATION, village_y + MAX_DISTANCE_VILLAGE_CREATION)
+        },
+      ],
+    });
+
+    return (
+      closestVillages
+    );
+  }
+
   async create(villageDto: CreateVillageDto, userId: number): Promise<Village> {
     const user = await this.usersRepository.findOneOrFail(userId);
     const villagesForThisUser = await this.villagesRepository.find({
       where: { user: { id: userId } },
     });
+
+    const closestVillages = await this.checkClosestVillageDistance(
+      villageDto.x,
+      villageDto.y
+    );
+
+    if(closestVillages.length == 0){
+      throw new HttpException(
+        `Your village is too far from other villages, creation is blocked`,
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
     let facilities = [];
 
     const nbVillages = villagesForThisUser.length;

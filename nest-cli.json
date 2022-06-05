@@ -114,6 +114,22 @@
           }
         ]
       }
+    },
+    "blockchain-ms": {
+      "type": "application",
+      "root": "apps/blockchain-ms",
+      "entryFile": "main",
+      "sourceRoot": "apps/blockchain-ms/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/blockchain-ms/tsconfig.app.json",
+        "assets": [
+          {
+            "include": "../config/*.yml",
+            "watchAssets": true,
+            "outDir": "dist/apps/blockchain-ms/config"
+          }
+        ]
+      }
     }
   }
 }

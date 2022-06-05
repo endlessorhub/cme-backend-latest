@@ -41,6 +41,9 @@ docker container rm uprod
 echo "Deleting previous resources-ms"
 docker container rm resources-ms
 
+echo "Deleting previous blockchain-ms"
+docker container rm blockchain-ms
+
 echo "Building dockers"
 ./init.sh $ENV
 

@@ -15,8 +15,8 @@ async function bootstrap() {
   app.useGlobalInterceptors(new TransformInterceptor());
 
   const options = new DocumentBuilder()
-    .setTitle('CME API')
-    .setDescription('Crypto Monkey Empire API')
+    .setTitle('ME API')
+    .setDescription('Monkey Empire API')
     .setVersion('1.0')
     .addTag('cme')
     .addBearerAuth()

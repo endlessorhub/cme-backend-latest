@@ -2,11 +2,21 @@
  * Basic resources
  */
 
-export enum RESOURCES {
+export enum BASE_RESOURCES {
   FOOD = 'food',
   WOOD = 'wood',
   IRON = 'iron',
+}
+
+export enum CURRENCY_RESOURCES {
   MKC = 'mkc',
+}
+
+export enum RESOURCES {
+  FOOD = BASE_RESOURCES.FOOD,
+  WOOD = BASE_RESOURCES.WOOD,
+  IRON = BASE_RESOURCES.IRON,
+  MKC = CURRENCY_RESOURCES.MKC,
 }
 
 export const resourcesList: ReadonlyArray<RESOURCES> = [

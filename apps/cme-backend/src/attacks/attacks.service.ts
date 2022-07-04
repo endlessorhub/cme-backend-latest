@@ -71,6 +71,13 @@ export class AttacksService {
       );
     }
 
+    // Filter all the unit requested at 0 (fontend/UE5 automaticly send all the possible unit names). Must be done synchronously.
+    for (const unit of Object.keys(createAttackDto.unitSent)) {
+      if (createAttackDto.unitSent[unit]?.count <= 0) {
+        delete createAttackDto.unitSent[unit];
+      }
+    }
+
     // check if the village has enough units and store the slowest speed
     let slowestSpeed = 0;
     const unitSentKeys = Object.keys(createAttackDto.unitSent) || [];

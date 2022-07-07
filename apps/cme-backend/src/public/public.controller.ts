@@ -33,15 +33,5 @@ export class PublicController {
     
   }
 
-  @Public()
-  @Get('leaders/generic/:leaderBoardType')
-  async generic(@Request() req, @Query() queryParams: GetLeaders, @Param('leaderBoardType') leaderBoardType: string) {
-    if(leaderBoardType in LEADERS_QUERIES) {
-      return await this.publicService.getGenericLeaderRequest(queryParams.limit, LEADERS_QUERIES[leaderBoardType]);
-    }
-    throw new HttpException(`BAD Request ${leaderBoardType} not valid`, HttpStatus.BAD_REQUEST);
-    
-  }
-
 
 }

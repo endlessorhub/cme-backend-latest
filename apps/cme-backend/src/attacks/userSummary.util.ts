@@ -8,7 +8,7 @@ type DeepPartial<T> = {
 export type PartialAttack = DeepPartial<Attack>;
 
 type AttacksInProgress = Readonly<{
-  suffered: PartialAttack | null;
+  suffered: ReadonlyArray<PartialAttack>;
   made: ReadonlyArray<PartialAttack>;
 }>;
 

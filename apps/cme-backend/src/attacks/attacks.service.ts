@@ -216,17 +216,18 @@ export class AttacksService {
         order: { id: 'DESC' },
       },
     );
-    const inProgressSuffered: Attack = await this.attacksRepository.findOne({
-      where: [{ defender: { id: userRequesting.id }, isUnderAttack: true }],
-      order: { id: 'DESC' },
-    });
+    const inProgressSuffered: ReadonlyArray<Attack> = await this.attacksRepository.find(
+      {
+        where: [{ defender: { id: userRequesting.id }, isUnderAttack: true }],
+        take: 5,
+        order: { id: 'DESC' },
+      },
+    );
 
     return {
       inProgress: {
         made: formatSimplerAttackList(inProgressMade),
-        suffered: isEmpty(inProgressSuffered)
-          ? null
-          : formatSimplerAttackEntity(inProgressSuffered),
+        suffered: formatSimplerAttackList(inProgressSuffered),
       },
       lastFiveAttacksMade: formatSimplerAttackList(lastFiveAttacksMade),
       lastFiveAttacksSuffered: formatSimplerAttackList(lastFiveAttacksSuffered),

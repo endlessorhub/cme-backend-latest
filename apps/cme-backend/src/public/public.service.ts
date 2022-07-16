@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { Connection } from 'typeorm';
 
 const MAX_LIMIT_LEADERS = 50;
-const DEFAULT_LIMIT_LEADERS = 10;
+const DEFAULT_LIMIT_LEADERS = 20;
 
 export type VillageLeader = Readonly<{
   name: string;

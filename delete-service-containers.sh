@@ -13,4 +13,7 @@ echo "Deleting uprod"
 docker container rm uprod
 
 echo "Deleting resources-ms"
-docker container rm rms
+docker container rm resources-ms
+
+echo "Deleting blockchain-ms"
+docker container rm blockchain-ms

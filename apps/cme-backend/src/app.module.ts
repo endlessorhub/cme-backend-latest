@@ -21,6 +21,8 @@ import { AttacksModule } from './attacks/attacks.module';
 import { ConfigurationModule } from '@app/configuration';
 import { ConfigurationService } from '@app/configuration';
 import { PublicModule } from './public/public.module';
+import { UserGlobalMkcModule } from './user-global-mkc/user-global-mkc.module';
+import { MkcModule } from './mkc/mkc.module';
 import * as path from 'path';
 
 @Module({
@@ -55,6 +57,8 @@ import * as path from 'path';
     IndustriesModule,
     AttacksModule,
     PublicModule,
+    UserGlobalMkcModule,
+    MkcModule,
   ],
   controllers: [AppController],
   providers: [AppService],

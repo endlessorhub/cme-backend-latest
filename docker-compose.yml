@@ -72,6 +72,17 @@ services:
     volumes:
       - ./:/home/node/app
 
+  blockchain-ms:
+    container_name: blockchain-ms
+    build:
+      context: ./apps/blockchain-ms
+    environment:
+      NODE_ENV: ${ENV}
+    ports:
+      - 3005:3005
+    volumes:
+      - ./:/home/node/app
+
   db:
     container_name: pg
     image: postgres:13.2

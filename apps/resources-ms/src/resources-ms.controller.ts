@@ -6,6 +6,7 @@ import { ResourceInfo, ResourceUnitInfo, mergeRulesToList } from './rules';
 import {
   CreateFacilityMsReq,
   CreateOrderMsReq,
+  ExchangeResBetweenOwnVillageMsReq,
   FindFacilitiesForVillageMsReq,
   FindFacilityMsReq,
   FormatVillageResourcesMsReq,
@@ -16,6 +17,7 @@ import {
 import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
 import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities.service';
 import { ResourcesMsService } from './services/resources-ms.service';
+import { ResourcesMsExchangesService } from './services/resources-ms-exchanges.service';
 
 @Controller()
 export class ResourcesMsController {
@@ -23,6 +25,7 @@ export class ResourcesMsController {
     private readonly resourcesMsFacilitiesService: ResourcesMsFacilitiesService,
     private readonly resourcesMsOrdersService: ResourcesMsOrdersService,
     private readonly resourcesMsService: ResourcesMsService,
+    private readonly resourcesExchangesMsService: ResourcesMsExchangesService,
   ) {}
 
   /**
@@ -104,6 +107,20 @@ export class ResourcesMsController {
     village: FormatVillageResourcesMsReq,
   ): Promise<any> {
     return this.resourcesMsService.formatVillageResources(village);
+  }
+
+  @MessagePattern({
+    cmd: ResourcesMicroServiceMessages.EXCHANGE_RESOURCES_OWN_VILLAGES,
+  })
+  async exchangeResourcesBetweenOwnVillages(
+    req: ExchangeResBetweenOwnVillageMsReq,
+  ): Promise<any> {
+    return this.resourcesExchangesMsService.exchangeResourcesBetweenSameUserVillages(
+      req.senderVillageId,
+      req.receiverVillageId,
+      req.sentResources,
+      req.userId,
+    );
   }
 
   /**

@@ -11,24 +11,45 @@ import {
   UsePipes,
   ValidationPipe,
 } from '@nestjs/common';
+import {
+  ClientProxyFactory,
+  Transport,
+  ClientProxy,
+} from '@nestjs/microservices';
+import { InjectRolesBuilder, RolesBuilder } from 'nest-access-control';
+import { isEmpty } from 'lodash';
+
 import { VillagesService } from './villages.service';
 import { CreateVillageDto } from './dto/create-village.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { InjectRolesBuilder, RolesBuilder } from 'nest-access-control';
 import { Village } from './village.entity';
 import { GetVillagesRectangle } from './../villages-resource-types/village-query-level-stream';
 import { VillageResourcesSummary } from './types';
 import { VillageResourceType } from '../villages-resource-types/village-resource-type.entity';
-import { isEmpty } from 'lodash';
+import { ExchangeResourcesOwnVillagesDto } from './dto/exchange-resource-own.dto';
+import {
+  ExchangeResBetweenOwnVillageMsReq,
+  ResourcesMicroServiceMessages,
+} from 'apps/resources-ms/src/service-messages';
 
 @ApiBearerAuth()
 @Controller('villages')
 export class VillagesController {
+  private resourcesMSClient: ClientProxy;
+
   constructor(
     private villagesService: VillagesService,
     @InjectRolesBuilder()
     private readonly rolesBuilder: RolesBuilder,
-  ) {}
+  ) {
+    this.resourcesMSClient = ClientProxyFactory.create({
+      transport: Transport.TCP,
+      options: {
+        host: 'resources-ms',
+        port: 3004,
+      },
+    });
+  }
 
   @Get()
   async index(
@@ -117,6 +138,29 @@ export class VillagesController {
       fighters,
       others,
     };
+  }
+
+  @Post(':id/send-resources')
+  @UsePipes(new ValidationPipe({ transform: true }))
+  sendResourcesFromVillage(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() body: ExchangeResourcesOwnVillagesDto,
+  ) {
+    const pattern = {
+      cmd: ResourcesMicroServiceMessages.EXCHANGE_RESOURCES_OWN_VILLAGES,
+    };
+    const request: ExchangeResBetweenOwnVillageMsReq = {
+      senderVillageId: Number(id),
+      receiverVillageId: body.receiverVillageId,
+      sentResources: body.resourcesSent,
+      userId: req.user.id,
+    };
+
+    return this.resourcesMSClient.send<any, ExchangeResBetweenOwnVillageMsReq>(
+      pattern,
+      request,
+    );
   }
 
   @Post()

@@ -18,7 +18,10 @@ import { ResourcesMsFacilitiesService } from './services/resources-ms-facilities
 import { ResourcesUpdaterCronService } from './services/resources-updater-cron.service';
 import { ResourcesMsOrdersService } from './services/resources-ms-orders.service';
 import { ResourcesMsService } from './services/resources-ms.service';
+import { ResourcesMsExchangesService } from './services/resources-ms-exchanges.service';
 import { Order } from 'apps/cme-backend/src/orders/orders.entity';
+import { Village } from 'apps/cme-backend/src/villages/village.entity';
+import { ResourceType } from 'apps/cme-backend/src/resource-types/resource-type.entity';
 
 @Module({
   imports: [
@@ -42,8 +45,10 @@ import { Order } from 'apps/cme-backend/src/orders/orders.entity';
     RedlockModule,
     TypeOrmModule.forFeature([Facility]),
     TypeOrmModule.forFeature([FacilityTypePrice]),
+    TypeOrmModule.forFeature([Village]),
     TypeOrmModule.forFeature([VillageResourceType]),
     TypeOrmModule.forFeature([Order]),
+    TypeOrmModule.forFeature([ResourceType]),
   ],
   controllers: [ResourcesMsController],
   providers: [
@@ -51,6 +56,7 @@ import { Order } from 'apps/cme-backend/src/orders/orders.entity';
     ResourcesUpdaterCronService,
     ResourcesMsOrdersService,
     ResourcesMsService,
+    ResourcesMsExchangesService,
   ],
 })
 export class ResourcesMsModule {

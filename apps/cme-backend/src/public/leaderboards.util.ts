@@ -27,6 +27,7 @@ export const LEADERS_QUERIES = {
     [LeaderBoardType.WARLIKE_LEADERS] : "SELECT users.username, count(*) as count_attack \
                                             FROM attacks \
                                             LEFT JOIN users on users.id = attacker_id \
+                                            ${whereClause} \
                                                 group by users.username \
                                                 order by count_attack desc \
                                             LIMIT ${limit}"
@@ -37,6 +38,7 @@ export const LEADERS_QUERIES = {
                                                 as x) \
                                                 as y \
                                                     left join users on users.id = attacker_id \
+                                            ${whereClause} \
                                             group by attacker_id, username order by stolen_volume desc \
                                             LIMIT ${limit}"
 }

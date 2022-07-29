@@ -20,14 +20,14 @@ export class PublicController {
   @Public()
   @Get('leaders')
   async leaders(@Request() req, @Query() queryParams: GetLeaders) {
-    return await this.publicService.getGenericLeaderRequest(queryParams.limit, "economicLeaders");
+    return await this.publicService.getGenericLeaderRequest("economicLeaders" , queryParams.limit, "economicLeaders", "none");
   }
 
   @Public()
-  @Get('leaders/generic/:leaderBoardType')
-  async generic(@Request() req, @Query() queryParams: GetLeaders, @Param('leaderBoardType') leaderBoardType: string) {
+  @Get('leaders/generic/:leaderBoardType/:period')
+  async generic(@Request() req, @Query() queryParams: GetLeaders, @Param('leaderBoardType') leaderBoardType: string, @Param('period') period: string) {
     if(leaderBoardType in LEADERS_QUERIES) {
-      return await this.publicService.getGenericLeaderRequest(queryParams.limit, LEADERS_QUERIES[leaderBoardType]);
+      return await this.publicService.getGenericLeaderRequest(leaderBoardType, queryParams.limit, LEADERS_QUERIES[leaderBoardType], period);
     }
     throw new HttpException(`BAD Request ${leaderBoardType} not valid`, HttpStatus.BAD_REQUEST);
     

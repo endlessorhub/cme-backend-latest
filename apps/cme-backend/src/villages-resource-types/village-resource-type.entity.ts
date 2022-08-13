@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { Village } from '../villages/village.entity';
 import { ResourceType } from '../resource-types/resource-type.entity';
+import { IsOptional } from 'class-validator';
 
 @Entity({ name: 'villages_resource_types' })
 export class VillageResourceType {
@@ -45,4 +46,11 @@ export class VillageResourceType {
     name: 'resource_type_id',
   })
   resourceType: ResourceType;
+
+  toJSON?() {
+    return {
+      ...this,
+      count: Number(this.count),
+    };
+  }
 }

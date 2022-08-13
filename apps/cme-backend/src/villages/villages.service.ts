@@ -199,20 +199,26 @@ export class VillagesService {
     });
   }
 
-  checkClosestVillageDistance(village_x : number , village_y : number): Promise<Village> {
-    
+  checkClosestVillageDistance(
+    village_x: number,
+    village_y: number,
+  ): Promise<Village> {
     const closestVillages = this.villagesRepository.find({
       where: [
         {
-          x: Between(village_x - MAX_DISTANCE_VILLAGE_CREATION, village_x + MAX_DISTANCE_VILLAGE_CREATION),
-          y: Between(village_y - MAX_DISTANCE_VILLAGE_CREATION, village_y + MAX_DISTANCE_VILLAGE_CREATION)
+          x: Between(
+            village_x - MAX_DISTANCE_VILLAGE_CREATION,
+            village_x + MAX_DISTANCE_VILLAGE_CREATION,
+          ),
+          y: Between(
+            village_y - MAX_DISTANCE_VILLAGE_CREATION,
+            village_y + MAX_DISTANCE_VILLAGE_CREATION,
+          ),
         },
       ],
     });
 
-    return (
-      closestVillages
-    );
+    return closestVillages;
   }
 
   async create(villageDto: CreateVillageDto, userId: number): Promise<Village> {
@@ -223,10 +229,10 @@ export class VillagesService {
 
     const closestVillages = await this.checkClosestVillageDistance(
       villageDto.x,
-      villageDto.y
+      villageDto.y,
     );
 
-    if(closestVillages.length == 0){
+    if (closestVillages.length == 0) {
       throw new HttpException(
         `Your village is too far from other villages, creation is blocked`,
         HttpStatus.BAD_REQUEST,

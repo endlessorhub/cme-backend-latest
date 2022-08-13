@@ -1,12 +1,12 @@
-import {MigrationInterface, QueryRunner} from "typeorm";
+import { MigrationInterface, QueryRunner } from 'typeorm';
 import * as Promise from 'bluebird';
 import unitsJson = require('./resources/units.json');
 
 export class Populate1605441756285 implements MigrationInterface {
-
-    public async up(queryRunner: QueryRunner): Promise<void> {
-        await Promise.mapSeries([
-            `INSERT INTO industries (name) VALUES
+  public async up(queryRunner: QueryRunner): Promise<void> {
+    await Promise.mapSeries(
+      [
+        `INSERT INTO industries (name) VALUES
                 ('food'),
                 ('metal'),
                 ('wood'),
@@ -15,7 +15,7 @@ export class Populate1605441756285 implements MigrationInterface {
                 ('research'),
                 ('trade'),
                 ('cryptocurrency');`,
-            `INSERT INTO facility_types (type, industry, parameters) VALUES
+        `INSERT INTO facility_types (type, industry, parameters) VALUES
                 ('cropland', 1, '{ "frequency": 3600, "quantity": 10, "increase_rate": 0.1 }'),
                 ('iron_mine', 2, '{ "frequency": 3600, "quantity": 10, "increase_rate": 0.1 }'),
                 ('sawmill', 3, '{ "frequency": 3600, "quantity": 10, "increase_rate": 0.1 }'),
@@ -28,17 +28,17 @@ export class Populate1605441756285 implements MigrationInterface {
                 ('marketplace', 7, NULL),
                 ('mkc_mine', 8, '{ "frequency": 3600, "quantity": 10, "increase_rate": 0.1 }'),
                 ('main', NULL, NULL);`,
-            `INSERT INTO resource_types (type, industry, characteristics, evolution) VALUES 
+        `INSERT INTO resource_types (type, industry, characteristics, evolution) VALUES 
                 ('food', 1, NULL, NULL), 
                 ('iron', 2, NULL, NULL), 
                 ('wood', 3, NULL, NULL),
                 ('mkc', 8, NULL, NULL);`,
-            `INSERT INTO facility_types_resource_types (facility_type_id, resource_type_id, level, level_cost) VALUES 
+        `INSERT INTO facility_types_resource_types (facility_type_id, resource_type_id, level, level_cost) VALUES 
                 (1, 1, NULL, NULL), 
                 (2, 2, NULL, NULL), 
                 (3, 3, NULL, NULL),
                 (11, 4, NULL, NULL);`,
-            `INSERT INTO facility_type_prices (facility_type_id, resource_type_id, amount) VALUES 
+        `INSERT INTO facility_type_prices (facility_type_id, resource_type_id, amount) VALUES 
                 (1, 2, 50), 
                 (1, 3, 50), 
                 (2, 1, 50), 
@@ -69,20 +69,23 @@ export class Populate1605441756285 implements MigrationInterface {
                 (11, 1, 250),
                 (11, 2, 40),
                 (11, 3, 170);`,
-        ], (query) => queryRunner.query(query));
+      ],
+      (query) => queryRunner.query(query),
+    );
 
-        for (const [ facilityType, units ] of Object.entries(unitsJson)) {
-            let level = 0;
-            for (const [ unitType, value ] of Object.entries(units)) {
-                level++;
-                const { characteristics, costs } = value; 
-                const [ { id: resourceTypeId } ] = await queryRunner.query(`
+    for (const [facilityType, units] of Object.entries(unitsJson)) {
+      let level = 0;
+      for (const [unitType, value] of Object.entries(units)) {
+        level++;
+        const { characteristics, costs } = value;
+        const [{ id: resourceTypeId }] = await queryRunner.query(`
                     INSERT INTO resource_types (type, industry, characteristics, evolution)
-                    VALUES ('${unitType}', 3, '${JSON.stringify(characteristics)}', NULL)
-                    RETURNING id`
-                );
+                    VALUES ('${unitType}', 3, '${JSON.stringify(
+          characteristics,
+        )}', NULL)
+                    RETURNING id`);
 
-                await queryRunner.query(`
+        await queryRunner.query(`
                     INSERT INTO resource_type_prices (target_resource_type_id, source_resource_type_id, amount)
                     VALUES 
                     (${resourceTypeId}, 1, ${costs.food}),
@@ -90,23 +93,35 @@ export class Populate1605441756285 implements MigrationInterface {
                     (${resourceTypeId}, 3, ${costs.wood})
                 `);
 
-                await queryRunner.query(`
+        await queryRunner.query(`
                     INSERT INTO facility_types_resource_types (facility_type_id, resource_type_id, level, level_cost)
                     SELECT ftq.id,  ${resourceTypeId}, ${level}, ${100 * level}
                     FROM
                     (SELECT id FROM facility_types WHERE type = '${facilityType}') ftq
                 `);
-            }
-        }
-
+      }
     }
 
-    public async down(queryRunner: QueryRunner): Promise<void> {
-        await queryRunner.clearTable('facility_types_resource_types');
-        await queryRunner.clearTable('resource_type_prices');
-        await queryRunner.clearTable('facility_types');
-        await queryRunner.clearTable('resource_types');
-        await queryRunner.clearTable('industries');
-    }
+    await queryRunner.query(`INSERT INTO "users" ("id", "email", "username", "password", "eth_wallet_addresses", "role", "new", "created_at", "updated_at") VALUES
+    (1, 'admin@monkeyempire.net', 'admin', '0',	NULL, NULL, '0', NOW(), NOW())
+    RETURNING id`);
 
+    await queryRunner.query(`
+    INSERT INTO "villages" ("id", "name", "population", "x", "y", "eth_wallet_address", "created_at", "updated_at", "user_id") VALUES
+    (1, 'adminville',  0,  1,  1,  NULL,   NOW(),  NOW(),  1);
+
+    INSERT INTO "villages_resource_types" ("id", "village_id", "resource_type_id", "count", "created_at", "updated_at") VALUES
+    (1,	1,	1,	100,	NOW(),	NOW()),
+    (2,	1,	2,	100,	NOW(),	NOW()),
+    (3,	1,	3,	100,	NOW(),	NOW());
+    `);
+  }
+
+  public async down(queryRunner: QueryRunner): Promise<void> {
+    await queryRunner.clearTable('facility_types_resource_types');
+    await queryRunner.clearTable('resource_type_prices');
+    await queryRunner.clearTable('facility_types');
+    await queryRunner.clearTable('resource_types');
+    await queryRunner.clearTable('industries');
+  }
 }

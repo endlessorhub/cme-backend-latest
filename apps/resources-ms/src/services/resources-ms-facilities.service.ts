@@ -1,7 +1,7 @@
 import { Injectable, Logger, HttpException, HttpStatus } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Connection, Repository } from 'typeorm';
-import { isEmpty, some } from 'lodash';
+import { some } from 'lodash';
 
 import { Facility } from 'apps/cme-backend/src/facilities/facility.entity';
 import { CreateFacilityMsReq } from '../service-messages';

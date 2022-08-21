@@ -1,19 +1,19 @@
 import {
-    Entity,
-    Column,
-    PrimaryGeneratedColumn,
-    CreateDateColumn,
-    UpdateDateColumn,
-    ManyToOne,
-    JoinColumn,
-    Unique,
-    OneToMany,
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+  Unique,
+  OneToMany,
 } from 'typeorm';
-import { Village } from "../villages/village.entity";
+import { Village } from '../villages/village.entity';
 import { FacilityType } from '../facility-types/facility-type.entity';
 import { Order } from '../orders/orders.entity';
 
-@Entity({name: 'facilities'})
+@Entity({ name: 'facilities' })
 @Unique(['village', 'location'])
 export class Facility {
   @PrimaryGeneratedColumn()
@@ -26,36 +26,41 @@ export class Facility {
   location: number;
 
   @Column({
-    name: 'last_production_at'
+    name: 'last_production_at',
   })
-  lastProductionAt: Date
+  lastProductionAt: Date;
 
   @CreateDateColumn({
-    name: 'created_at'
+    name: 'created_at',
   })
   createdAt: Date;
 
   @UpdateDateColumn({
-    name: 'updated_at'
+    name: 'updated_at',
   })
   updatedAt: Date;
 
-  @ManyToOne(() => FacilityType, facilityType => facilityType.facilities, {
+  @Column({
+    name: 'is_in_production',
+  })
+  isInProduction: boolean;
+
+  @ManyToOne(() => FacilityType, (facilityType) => facilityType.facilities, {
     eager: true,
   })
   @JoinColumn({
-    name: 'facility_type_id'
+    name: 'facility_type_id',
   })
   facilityType: FacilityType;
 
-  @ManyToOne(() => Village, village => village.facilities, {
+  @ManyToOne(() => Village, (village) => village.facilities, {
     eager: true,
   })
   @JoinColumn({
-    name: 'village_id'
+    name: 'village_id',
   })
   village: Village;
 
-  @OneToMany(() => Order, order => order.facility)
+  @OneToMany(() => Order, (order) => order.facility)
   orders: Order[];
 }

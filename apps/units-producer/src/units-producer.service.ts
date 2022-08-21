@@ -4,8 +4,10 @@ import { Injectable } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
 import * as Promise from 'bluebird';
 import * as Redis from 'ioredis';
-import { Connection, QueryRunner } from 'typeorm';
+import { Connection, QueryRunner, Repository } from 'typeorm';
 import { RedisService } from 'nestjs-redis';
+import { Facility } from 'apps/cme-backend/src/facilities/facility.entity';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class UnitsProducerService {
@@ -17,6 +19,8 @@ export class UnitsProducerService {
     private schedulerService: SchedulerService,
     private redisService: RedisService,
     private redlockService: RedlockService,
+    @InjectRepository(Facility)
+    private facilitiesRepository: Repository<Facility>,
   ) {}
 
   async onModuleInit() {
@@ -54,6 +58,7 @@ export class UnitsProducerService {
           orderedQuantity,
           productionTime,
           villageId,
+          facilityId,
           queue,
           action,
         } = parsed;
@@ -120,9 +125,26 @@ export class UnitsProducerService {
             `;
             }
             await this.queryRunner.query(query);
+
+            // Look if the facility has other units to produce.
+            const isCurrentProductionContinued =
+              rows.length === 0 || deliveredQuantity + 1 < orderedQuantity;
+
+            if (!isCurrentProductionContinued) {
+              const facility = await this.facilitiesRepository.findOne({
+                where: { id: facilityId },
+              });
+
+              // release the facility of its duties.
+              await this.queryRunner.manager.getRepository(Facility).save({
+                ...facility,
+                isInProduction: false,
+              });
+            }
+
             await this.queryRunner.commitTransaction();
 
-            if (rows.length === 0 || deliveredQuantity + 1 < orderedQuantity) {
+            if (isCurrentProductionContinued) {
               await this.redisClient
                 .zadd(
                   `delayed:${resourceType}`,
@@ -133,6 +155,7 @@ export class UnitsProducerService {
                     orderedQuantity,
                     productionTime,
                     villageId,
+                    facilityId,
                     queue,
                     action: 'create',
                   }),

@@ -9,23 +9,29 @@ import { UnitsProducerService } from './units-producer.service';
 import * as path from 'path';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection } from 'typeorm';
+import { Facility } from 'apps/cme-backend/src/facilities/facility.entity';
 
 @Module({
   imports: [
-    ConfigurationModule.register({projectRoot: path.resolve(__dirname, '..')}),
+    ConfigurationModule.register({
+      projectRoot: path.resolve(__dirname, '..'),
+    }),
     TypeOrmModule.forRootAsync({
       imports: [ConfigurationModule],
-      useFactory: (configurationService: ConfigurationService) => configurationService.get('typeorm'),
+      useFactory: (configurationService: ConfigurationService) =>
+        configurationService.get('typeorm'),
       inject: [ConfigurationService],
     }),
     RedisModule.forRootAsync({
       imports: [ConfigurationModule],
-      useFactory: (configurationService: ConfigurationService) => configurationService.get('db.redis'),
+      useFactory: (configurationService: ConfigurationService) =>
+        configurationService.get('db.redis'),
       inject: [ConfigurationService],
     }),
     ScheduleModule.forRoot(),
     SchedulerModule,
     RedlockModule,
+    TypeOrmModule.forFeature([Facility]),
   ],
   controllers: [UnitsProducerController],
   providers: [UnitsProducerService],

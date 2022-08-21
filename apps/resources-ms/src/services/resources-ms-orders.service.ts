@@ -6,6 +6,7 @@ import { RedisService } from 'nestjs-redis';
 
 import { CreateOrderMsReq } from '../service-messages';
 import { Order } from 'apps/cme-backend/src/orders/orders.entity';
+import { Facility } from 'apps/cme-backend/src/facilities/facility.entity';
 
 @Injectable()
 export class ResourcesMsOrdersService {
@@ -16,6 +17,8 @@ export class ResourcesMsOrdersService {
     @InjectRepository(Order)
     private ordersRepository: Repository<Order>,
     private redisService: RedisService,
+    @InjectRepository(Facility)
+    private facilitiesRepository: Repository<Facility>,
   ) {}
 
   async create(order: CreateOrderMsReq): Promise<Order | HttpException> {
@@ -68,6 +71,14 @@ export class ResourcesMsOrdersService {
         throw new Error('Insufficient resources');
       }
 
+      const facility = await this.facilitiesRepository.findOne({
+        where: { id: order.facilityId },
+      });
+
+      if (facility.isInProduction) {
+        throw new Error('Facility already in production');
+      }
+
       const {
         village_id: villageId,
         target_resource_type_id: resourceTypeId,
@@ -97,6 +108,12 @@ export class ResourcesMsOrdersService {
       order.resourceType = resourceTypeId;
       order.facility = { id: order.facilityId };
       orderEntity = await queryRunner.manager.getRepository(Order).save(order);
+
+      await queryRunner.manager.getRepository(Facility).save({
+        ...facility,
+        isInProduction: true,
+      });
+
       await queryRunner.commitTransaction();
 
       const redisClient = await this.redisService.getClient();
@@ -110,6 +127,7 @@ export class ResourcesMsOrdersService {
             orderedQuantity: orderEntity.orderedQuantity,
             productionTime,
             villageId,
+            facilityId: order.facilityId,
             queue: `pending:${resourceType}`,
             action: 'create',
           }),

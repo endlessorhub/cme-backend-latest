@@ -20,17 +20,22 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<User> {
     const hdwallet = HDWallet.fromMnemonic(mnemonic);
     const mywallet = hdwallet.derive(`m/44'/60'/0'/0`);
-    const getAllUsers: any = this.usersRepository.findAll();
-    const lastDrive: any = Math.max(...getAllUsers.map((o) => o.derive));
-    const newDrive = lastDrive.derive++;
+    const getAllUsers: any = await this.usersRepository.findAll();
+    console.log('getAllUsers', user);
+    let drive: any = 1;
+    if (getAllUsers.length !== 0) {
+      drive = Math.max(...getAllUsers.map((o) => o.derive));
+      drive = drive.derive++;
+    }
+
     user.password = await bcrypt.hash(user.password, 10);
     user.ethWalletAddresses = `0x${mywallet
-      .derive(newDrive)
+      .derive(drive)
       .getAddress()
       .toString('hex')}`;
 
     user.ethPrivateKey = `${mywallet
-      .derive(newDrive)
+      .derive(drive)
       .getPrivateKey()
       .toString('hex')}`;
     return this.usersRepository.save(user);

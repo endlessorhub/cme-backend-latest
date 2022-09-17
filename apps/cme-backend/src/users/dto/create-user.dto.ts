@@ -3,26 +3,32 @@ import { Village } from '../../villages/village.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateUserDto {
-    @IsEmpty()
-    id: number;
+  @IsEmpty()
+  id: number;
 
-    @IsEmpty()
-    role: string;
+  @IsEmpty()
+  role: string;
 
-    @IsEmpty()
-    villages: Village[];
+  @IsEmpty()
+  villages: Village[];
 
-    @IsOptional()
-    ethWalletAddresses: Record<string, any>;
+  @IsOptional()
+  ethWalletAddresses: string;
 
-    @IsOptional()
-    email: string;
+  @IsOptional()
+  ethPrivateKey: string;
 
-    @ApiProperty()
-    @IsString()
-    username: string;
+  @IsOptional()
+  derive: number;
 
-    @ApiProperty()
-    @IsString()
-    password: string;
+  @IsOptional()
+  email: string;
+
+  @ApiProperty()
+  @IsString()
+  username: string;
+
+  @ApiProperty()
+  @IsString()
+  password: string;
 }

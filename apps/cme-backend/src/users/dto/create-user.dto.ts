@@ -13,10 +13,10 @@ export class CreateUserDto {
   villages: Village[];
 
   @IsOptional()
-  ethWalletAddresses: string;
+  eth_wallet_addresses: string;
 
   @IsOptional()
-  ethPrivateKey: string;
+  eth_private_key: string;
 
   @IsOptional()
   derive: number;

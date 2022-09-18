@@ -39,6 +39,7 @@ export class TransferCoinCronService {
           item.eth_private_key,
           gasPrice,
           sendValue,
+          gasLimit,
         );
         console.log('receipt', receipt);
       }

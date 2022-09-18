@@ -11,6 +11,7 @@ export class RPCService {
       ethereum: `https://mainnet.infura.io/v3/${keys}`,
       polygon: `https://rpc-mainnet.maticvigil.com`,
       bsc: 'https://bsc-dataseed1.binance.org:443',
+      avax: `https://api.avax.network/ext/bc/C/rpc`,
     };
   }
 
@@ -21,6 +22,7 @@ export class RPCService {
       polygon: 'https://rpc-mumbai.maticvigil.com',
       ethereum: `https://rinkeby.infura.io/v3/${keys}`,
       bsc: 'https://data-seed-prebsc-1-s1.binance.org:8545',
+      avax: `https://api.avax.network/ext/bc/C/rpc`,
     };
   }
 

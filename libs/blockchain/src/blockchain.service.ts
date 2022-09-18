@@ -27,8 +27,9 @@ export class BlockchainService {
     web3: any,
     toAddress: string,
     private_key: string,
-    gasFee: any,
-    sendValue: any,
+    gasFee: number,
+    sendValue: string,
+    gasLimit: number,
   ) {
     try {
       const publicKey = await this.getPublicKey(web3, private_key);
@@ -36,7 +37,7 @@ export class BlockchainService {
       const txCount = await web3.eth.getTransactionCount(publicKey);
       const txObject = {
         nonce: web3.utils.toHex(txCount),
-        gasLimit: web3.utils.toHex(22000),
+        gasLimit: web3.utils.toHex(gasLimit - 100),
         gasPrice: gasFee,
         to: toAddress,
         value: sendValue,

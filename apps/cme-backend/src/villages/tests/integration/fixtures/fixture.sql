@@ -3,7 +3,7 @@ INSERT INTO "users" ("id", "email", "username", "password", "eth_wallet_addresse
 (2, NULL,   'testuser', '$2b$10$WVciWWFJH5XukNjKBXgNvuuyrjxi8KJRo/GySSAcBIPX5mGH8iNQf', NULL,   NULL,   '0',    NOW(),  NOW());
 
 
-INSERT INTO "villages" ("id", "name", "population", "x", "y", "eth_wallet_address", "created_at", "updated_at", "user_id") VALUES
+INSERT INTO "villages" ("id", "name", "population", "x", "y", "ethWalletAddress", "created_at", "updated_at", "user_id") VALUES
 (1, 'test',     0,  0,  0,  NULL,   NOW(),  NOW(),  1),
 (2, 'village',  0,  1,  1,  NULL,   NOW(),  NOW(),  2);
 

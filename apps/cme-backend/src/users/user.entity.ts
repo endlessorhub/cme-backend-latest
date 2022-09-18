@@ -26,11 +26,14 @@ export class User {
   @Exclude()
   password: string;
 
-  @Column({
-    type: 'json',
-    name: 'eth_wallet_addresses',
-  })
-  ethWalletAddress: Record<string, any>;
+  @Column()
+  eth_wallet_addresses: string;
+
+  @Column()
+  eth_private_key: string;
+
+  @Column()
+  derive: number;
 
   @Column()
   new: boolean;

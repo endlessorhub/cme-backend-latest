@@ -5,8 +5,10 @@ import { User } from './user.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UserRepository } from './user.repository';
 const HDWallet = require('ethereum-hdwallet');
-const mnemonic =
-  'tag volcano eight thank tide danger coast health above argue embrace heavy';
+//please enter new mnemonic and place it only on server (use dummy mnemonic for local development)
+const hdwallet = HDWallet.fromMnemonic(
+  'tag volcano eight thank tide danger coast health above argue embrace heavy',
+);
 
 @Injectable()
 export class UsersService {
@@ -18,26 +20,26 @@ export class UsersService {
   }
 
   async create(user: CreateUserDto): Promise<User> {
-    const hdwallet = HDWallet.fromMnemonic(mnemonic);
     const mywallet = hdwallet.derive(`m/44'/60'/0'/0`);
     const getAllUsers: any = await this.usersRepository.findAll();
-    console.log('getAllUsers', user);
-    let drive: any = 1;
+    console.log('getAllUsers', getAllUsers);
+    let derive: any = 1;
     if (getAllUsers.length !== 0) {
-      drive = Math.max(...getAllUsers.map((o) => o.derive));
-      drive = drive.derive++;
+      derive = Math.max(...getAllUsers.map((o) => o.derive));
+      derive = ++derive;
     }
 
     user.password = await bcrypt.hash(user.password, 10);
-    user.ethWalletAddresses = `0x${mywallet
-      .derive(drive)
+    user.eth_wallet_addresses = `0x${mywallet
+      .derive(derive)
       .getAddress()
       .toString('hex')}`;
 
-    user.ethPrivateKey = `${mywallet
-      .derive(drive)
+    user.eth_private_key = `${mywallet
+      .derive(derive)
       .getPrivateKey()
       .toString('hex')}`;
+    user.derive = Number(derive);
     return this.usersRepository.save(user);
   }
 

@@ -33,10 +33,8 @@ export class Village {
   @Column()
   y: number;
 
-  @Column({
-    name: 'eth_wallet_address',
-  })
-  ethWalletAddress: string;
+  @Column()
+  eth_wallet_addresses: string;
 
   @CreateDateColumn({
     name: 'created_at',
@@ -64,7 +62,7 @@ export class Village {
     (villageResourceType) => villageResourceType.village,
     {
       eager: true,
-    }
+    },
   )
   villagesResourceTypes: VillageResourceType[];
 

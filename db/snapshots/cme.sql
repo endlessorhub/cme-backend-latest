@@ -387,7 +387,11 @@ CREATE TABLE public.users (
     role character varying(255) DEFAULT NULL::character varying,
     new boolean DEFAULT true,
     created_at timestamp with time zone DEFAULT now() NOT NULL,
-    updated_at timestamp with time zone DEFAULT now() NOT NULL
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    email_confirmed boolean DEFAULT false,
+    email_confirmed_at timestamp with time zone DEFAULT now() NOT NULL,
+    last_verification_email_sent timestamp with time zone DEFAULT now() NOT NULL,
+    email_verification_token character varying(255) NOT NULL,
 );
 
 

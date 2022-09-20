@@ -33,9 +33,6 @@ export class Village {
   @Column()
   y: number;
 
-  @Column()
-  eth_wallet_addresses: string;
-
   @CreateDateColumn({
     name: 'created_at',
   })

@@ -50,6 +50,19 @@ export class User {
   @OneToMany(() => Attack, (attack) => attack.defender)
   attacksTo: Village[];
 
+
+  @Column({ default: false })
+  email_confirmed: boolean;
+
+  @Column({ type: 'timestamptz'})
+  email_confirmed_at: Date;
+
+  @Column({ type: 'timestamptz'})
+  last_verification_email_sent: Date;
+
+  @Column({})
+  email_verification_token: string
+
   @OneToMany(() => GuildMembers, (guildUser) => guildUser.user)
   memberGuilds: GuildMembers[];
   // Avoid returning unnecessary data, and protect password's hash
@@ -59,4 +72,5 @@ export class User {
       username: this.username,
     };
   }
+
 }

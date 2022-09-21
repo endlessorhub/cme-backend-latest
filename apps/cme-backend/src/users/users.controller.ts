@@ -47,10 +47,13 @@ export class UsersController {
   @UsePipes(new ValidationPipe({ transform: true }))
   @UseInterceptors(ClassSerializerInterceptor)
   create(@Body() user: CreateUserDto) {
-    if(validateEmail(user.username)){
+
+    /*if(validateEmail(user.username)){
       return this.usersService.create(user);
     } else {
       throw new BadRequestException('USERNAME_MUST_BE_A_VALID_EMAIL');
-    }
+    }*/
+    
+    return this.usersService.create(user);
   }
 }

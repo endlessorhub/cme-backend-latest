@@ -18,6 +18,7 @@ export class UsersService {
   async create(user: CreateUserDto): Promise<User> {
     user.email_verification_token = await bcrypt.hash(user.username+user.password, 10);
     user.password = await bcrypt.hash(user.password, 10);
+    //user.email = user.username
 
     //sending verification email
     this.mailService.sendVerificationEmail(user);
@@ -26,7 +27,6 @@ export class UsersService {
   }
 
   async get(username: string) {
-
     return this.usersRepository.findOneByUsername(username);
   }
 

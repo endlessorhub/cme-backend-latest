@@ -1,3 +1,5 @@
+import { UserRepository } from './../../cme-backend/src/users/user.repository';
+import { TransferCoinCronService } from './services/transfer.service';
 import * as path from 'path';
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -32,9 +34,14 @@ import { UserGlobalMKC } from 'apps/cme-backend/src/user-global-mkc/user-global-
     }),
     RedlockModule,
     TypeOrmModule.forFeature([UserGlobalMKC]),
+    TypeOrmModule.forFeature([UserRepository]),
   ],
   controllers: [BlockchainMsController],
-  providers: [BlockchainMsIngameMKCService, BlockchainMsMKCRelayService],
+  providers: [
+    BlockchainMsIngameMKCService,
+    BlockchainMsMKCRelayService,
+    TransferCoinCronService,
+  ],
 })
 export class BlockchainMsModule {
   constructor(private _connection: Connection) {}

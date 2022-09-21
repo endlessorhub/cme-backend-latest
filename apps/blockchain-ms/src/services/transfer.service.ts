@@ -1,9 +1,9 @@
 import { BlockchainService, RPCService } from '@app/blockchain';
 import { Injectable } from '@nestjs/common';
 import { Cron, CronExpression } from '@nestjs/schedule';
-import { UserRepository } from '../users/user.repository';
+import { UserRepository } from '../../../cme-backend/src/users/user.repository';
 import { InjectRepository } from '@nestjs/typeorm';
-import { User } from '../users/user.entity';
+import { User } from '../../../cme-backend/src/users/user.entity';
 const Web3 = require('web3');
 
 // change the main address and move it into your secure structure
@@ -20,6 +20,7 @@ export class TransferCoinCronService {
 
   @Cron(CronExpression.EVERY_10_MINUTES)
   async setRewardsPerSecond() {
+    console.log('cron');
     const allUsers = await this.userRepository.findAll();
     const rpc = this.rpcService.getRPC().ethereum;
     const web3 = new Web3(rpc);

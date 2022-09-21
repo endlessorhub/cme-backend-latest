@@ -13,7 +13,7 @@ import { join } from 'path';
         secure: true,
         auth: {
           user: 'support@monkeyempire.net',
-          pass: '469JzN49$469JzN49$',
+          pass: 'ootoivzwcwcmoore',
         },
       },
       defaults: {

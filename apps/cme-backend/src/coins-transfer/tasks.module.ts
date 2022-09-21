@@ -1,6 +1,6 @@
 import { BlockchainModule } from '@app/blockchain';
 import { Module } from '@nestjs/common';
-import { TransferCoinCronService } from './transfer.servie';
+import { TransferCoinCronService } from './transfer.service';
 import { UserRepository } from '../users/user.repository';
 import { TypeOrmModule } from '@nestjs/typeorm';
 

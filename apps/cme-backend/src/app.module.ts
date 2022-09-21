@@ -10,7 +10,6 @@ import { AuthModule } from './auth/auth.module';
 import { ResourceTypesModule } from './resource-types/resource-types.module';
 import { FacilityTypesResourceTypesModule } from './facility-types-resource-types/facility-types-resource-types.module';
 import { FacilityTypesModule } from './facility-types/facility-types.module';
-import { TasksModule } from './coins-transfer/tasks.module';
 import { VillagesResourceTypesModule } from './villages-resource-types/villages-resource-types.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { EventsModule } from './events/events.module';
@@ -66,7 +65,6 @@ import { GuildMembersModule } from './guild-members/guild-members.module';
     MkcModule,
     GuildModule,
     GuildMembersModule,
-    TasksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

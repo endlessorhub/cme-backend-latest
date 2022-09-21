@@ -12,7 +12,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(username: string, password: string): Promise<any> {
-
+    /*
     if(validateEmail(username)){
       const user = await this.authService.validateUser(username, password);
       if (!user) {
@@ -20,7 +20,11 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
       }
       return user;
     } else {
-      throw new BadRequestException('Login must be done with email');
+      throw new BadRequestException('LOGIN_MUST_BE_DONE_WITH_EMAIL');
+    }*/
+    const user = await this.authService.validateUser(username, password);
+    if (!user) {
+      throw new UnauthorizedException();
     }
   }
 }

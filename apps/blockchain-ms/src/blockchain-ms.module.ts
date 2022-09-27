@@ -13,6 +13,7 @@ import { BlockchainMsController } from './blockchain-ms.controller';
 import { BlockchainMsIngameMKCService } from './services/blockchain-ms-ingame-mkc.service';
 import { BlockchainMsMKCRelayService } from './services/blockchain-ms-mkc-relay.service';
 import { UserGlobalMKC } from 'apps/cme-backend/src/user-global-mkc/user-global-mkc.entity';
+import { BlockchainModule } from '@app/blockchain';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { UserGlobalMKC } from 'apps/cme-backend/src/user-global-mkc/user-global-
       inject: [ConfigurationService],
     }),
     RedlockModule,
+    BlockchainModule,
     TypeOrmModule.forFeature([UserGlobalMKC]),
     TypeOrmModule.forFeature([UserRepository]),
   ],

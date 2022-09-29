@@ -4,14 +4,16 @@
 set -e
 
 cd /home/node/app 
+echo '(1) ----> Install node modules ...'
 yarn install
 
 echo 'export PATH="$(yarn global bin):$PATH"' >> /home/node/.bashrc
-echo 'Building dist ...'
+echo '(2) ----> Building dist ...'
 yarn run build:libs && yarn run build:app:api
 
-echo 'Migrating databases ...'
+echo '(3) ----> Migrating databases ...'
 (cd migrations && npx tsc)
 yarn run migrate
 
+echo '(4) ----> Run ...'
 yarn run start:${NODE_ENV:-prod}:api

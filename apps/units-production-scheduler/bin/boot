@@ -4,9 +4,11 @@
 set -e
 
 cd /home/node/app 
+echo '(1) ----> Install node modules ...'
 yarn install
 
-echo 'Building dist ...'
+echo '(2) ----> Building dist ...'
 yarn run build:libs && yarn run build:app:ups
 
+echo '(3) ----> Run ...'
 yarn run start:${NODE_ENV:-prod}:ups

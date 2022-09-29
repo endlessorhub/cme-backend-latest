@@ -1,13 +1,13 @@
 #Should be executed as sudo and be downloaded apart
 
 #Dev by default
-if [ -z "${1}" ]; then 
-    ENV='dev'
+if [ -z "$1" ]; then 
+    ENV_VAL='dev'
 else 
-    ENV=${1}
+    ENV_VAL=$1
 fi
 
-echo "Deploying APP in $ENV environment"
+echo "Deploying APP in $ENV_VAL environment"
 
 
 echo "Deleting previous repo"
@@ -45,7 +45,7 @@ echo "Deleting previous blockchain-ms"
 docker container rm blockchain-ms
 
 echo "Building dockers"
-./init.sh $ENV
+./init.sh $ENV_VAL
 
 echo "Booting dockers"
-./boot.sh $ENV
+./boot.sh $ENV_VAL

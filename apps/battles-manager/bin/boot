@@ -4,10 +4,12 @@
 set -e
 
 cd /home/node/app 
+echo '(1) ----> Install node modules ...'
 yarn install
 
 echo 'export PATH="$(yarn global bin):$PATH"' >> /home/node/.bashrc
-echo 'Building dist ...'
+echo '(2) ----> Building dist ...'
 yarn run build:libs && yarn run build:app:bm
 
+echo '(3) ----> Run ...'
 yarn run start:${NODE_ENV:-prod}:bm
